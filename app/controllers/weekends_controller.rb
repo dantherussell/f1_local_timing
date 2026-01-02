@@ -4,7 +4,7 @@ class WeekendsController < ApplicationController
 
   def show
     @weekend = @season.weekends.find(params[:id])
-    @local_events = @weekend.events.order(:start_time).group_by { |e| e.start_time.to_date }
+    @local_events = @weekend.events.order(:start_time).group_by { |e| e.start_time.in_time_zone.strftime("%A %-d %B") }
     @track_events = @weekend.events.order(:start_time).group_by(&:date)
   end
 

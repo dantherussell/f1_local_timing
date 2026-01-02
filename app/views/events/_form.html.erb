@@ -21,7 +21,7 @@
             options_from_collection_for_select(@series, :id, :name, @event.session&.series_id),
             include_blank: "Select a series...",
             class: 'form-control',
-            data: { cascading_select_target: "series", action: "change->cascading-select#seriesChanged" } %>
+            data: { cascading_select_target: "series" } %>
     </div>
   </div>
   <br>

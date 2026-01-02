@@ -1,21 +1,34 @@
 import { Controller } from "@hotwired/stimulus"
+import TomSelect from "tom-select"
 
 export default class extends Controller {
   static targets = ["series", "session"]
   static values = { selectedSession: Number }
 
   connect() {
+    this.seriesSelect = new TomSelect(this.seriesTarget, {
+      allowEmptyOption: true,
+      onChange: (value) => this.loadSessions(value, null)
+    })
+
+    this.sessionSelect = new TomSelect(this.sessionTarget, {
+      allowEmptyOption: true
+    })
+
     if (this.seriesTarget.value) {
       this.loadSessions(this.seriesTarget.value, this.selectedSessionValue)
     }
   }
 
-  seriesChanged() {
-    this.loadSessions(this.seriesTarget.value, null)
+  disconnect() {
+    if (this.seriesSelect) this.seriesSelect.destroy()
+    if (this.sessionSelect) this.sessionSelect.destroy()
   }
 
   async loadSessions(seriesId, selectedId) {
-    this.sessionTarget.innerHTML = '<option value="">Select a session...</option>'
+    this.sessionSelect.clear()
+    this.sessionSelect.clearOptions()
+    this.sessionSelect.addOption({ value: "", text: "Select a session..." })
 
     if (!seriesId) return
 
@@ -23,11 +36,11 @@ export default class extends Controller {
     const sessions = await response.json()
 
     sessions.forEach(session => {
-      const option = document.createElement("option")
-      option.value = session.id
-      option.textContent = session.name
-      if (session.id === selectedId) option.selected = true
-      this.sessionTarget.appendChild(option)
+      this.sessionSelect.addOption({ value: session.id, text: session.name })
     })
+
+    if (selectedId) {
+      this.sessionSelect.setValue(selectedId)
+    }
   }
 }
