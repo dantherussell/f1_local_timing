@@ -1,0 +1,18 @@
+<h1><%= @weekend.gp_title %></h1>
+<h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
+<h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
+
+<% @track_events.each do |day, events| %>
+  <h4><%= day %></h4>
+  <table>
+    <tbody>
+      <% events.each do |event| %>
+        <tr <%= "class=f1".html_safe if event.series_name == "Formula 1" %>>
+          <td><%= event.series_name %></td>
+          <td><%= event.session_name %></td>
+          <td><%= event.circuit_time %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

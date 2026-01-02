@@ -1,0 +1,65 @@
+<%= form_with model: [@season, @weekend, @event],
+             data: { controller: "cascading-select", cascading_select_selected_session_value: @event.session_id } do |f| %>
+  <% if @event.errors.any? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@event.errors.count, "error") %> prohibited this event from being saved:</h2>
+
+      <ul>
+        <% @event.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <br>
+
+  <div class="form-group">
+    <%= label_tag :series_id, "Series" %>
+    <div>
+      <%= select_tag :series_id,
+            options_from_collection_for_select(@series, :id, :name, @event.session&.series_id),
+            include_blank: "Select a series...",
+            class: 'form-control',
+            data: { cascading_select_target: "series", action: "change->cascading-select#seriesChanged" } %>
+    </div>
+  </div>
+  <br>
+  <div class="form-group">
+    <%= f.label :session_id %>
+    <div>
+      <%= f.select :session_id, [],
+            { include_blank: "Select a session..." },
+            { class: 'form-control', data: { cascading_select_target: "session" } } %>
+    </div>
+  </div>
+  <br>
+  <div class="form-group">
+    Date
+    <div>
+      <%= f.date_field :start_time_date_field, class: 'form-control' %>
+    </div>
+    <br>
+  </div>
+  <div class="form-group">
+    <%= f.label :start_time %> in UTC
+    <div>
+      <%= f.time_field :start_time_time_field, class: 'form-control' %>
+    </div>
+    <br>
+  </div>
+  <div class="form-group">
+    <%= f.label :local_time_offset %> (e.g. "UTC+1" WITHOUT QUOTES)
+    <div>
+    <%= f.text_field :local_time_offset, class: 'form-control' %>
+    </div>
+  </div>
+  <br>
+  <div class="form-group">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<br>
+
+<%= link_to 'Back', season_weekend_path(@season, @weekend) %>

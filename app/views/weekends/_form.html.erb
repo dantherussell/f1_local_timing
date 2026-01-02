@@ -1,0 +1,59 @@
+<%= form_with model: [@season, @weekend] do |f| %>
+  <% if @weekend.errors.any? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@weekend.errors.count, "error") %> prohibited this weekend from being saved:</h2>
+
+      <ul>
+        <% @weekend.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <br>
+
+  <div class="form-group">
+    <%= f.label :race_number %> (e.g. 1)
+    <div>
+      <%= f.number_field :race_number, class: 'form-control' %>
+    </div>
+  </div><br>
+  <div class="form-group">
+    <%= f.label :gp_title %> (e.g. "2020 Styrian Grand Prix")
+    <div>
+      <%= f.text_field :gp_title, class: 'form-control' %>
+    </div>
+  </div><br>
+  <div class="form-group">
+    <%= f.label :location %> (e.g. "Spielberg, Austria")
+    <div>
+    <%= f.text_field :location, class: 'form-control' %>
+    </div>
+  </div><br>
+  <div class="form-group">
+    <%= f.label :timespan %> (e.g. "10th - 12th July")
+    <div>
+    <%= f.text_field :timespan, class: 'form-control' %>
+    </div>
+  </div><br>
+  <div class="form-group">
+    <%= f.label :local_timezone %> (e.g. "CEST")
+    <div>
+    <%= f.text_field :local_timezone, class: 'form-control' %>
+    </div>
+  </div><br>
+  <div class="form-group">
+    <%= f.label :local_time_offset %> (e.g. "UTC+1" WITHOUT QUOTES)
+    <div>
+    <%= f.text_field :local_time_offset, class: 'form-control' %>
+    </div>
+  </div>
+  <br>
+  <div class="form-group">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<br>
+<%= link_to 'Back', season_path(@season) %>

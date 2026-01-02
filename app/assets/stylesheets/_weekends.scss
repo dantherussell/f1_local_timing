@@ -1,0 +1,23 @@
+#local_times {
+  display: block;
+}
+
+#track_times {
+  display: none;
+}
+
+.clicked {
+  pointer-events: none;
+  text-decoration: none;
+  font-weight: bolder;
+  color: red !important;
+}
+
+.time_buttons {
+  display: inline-flex;
+}
+
+.time_button {
+  display: inline-flex;
+  padding-inline: 5em;
+}

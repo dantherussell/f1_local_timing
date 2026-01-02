@@ -8,21 +8,45 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="<%= cookies[:theme] || 'light' %>">
+    <div class="logo">
+      <%= link_to root_path do %>
+        <% if cookies[:theme] == "dark" %>
+          <%= image_tag "f1_furs_dark.png", size: '424x56' %>
+        <% else %>
+          <%= image_tag "f1_furs_light.png", size: '424x56' %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if notice.present? %>
+      <p class="notice"><%= notice %></p>
+    <% end %>
+
     <%= yield %>
+
+    <% unless request.path.include?("print") %>
+      <br><br>
+      <% if cookies[:theme] == "dark" %>
+        <%= link_to "Light Mode", root_path(theme: "light") %>
+      <% else %>
+        <%= link_to "Dark Mode", root_path(theme: "dark") %>
+      <% end %>
+
+      <br><br>
+      Support development on <%= link_to "Patreon", "https://www.patreon.com/f1furs" %> or on <%= link_to "Ko-fi", "https://ko-fi.com/thatwingwaffl" %>
+      <br><br>
+      I legally have to disclose that this website uses cookies. They are used to display the right theme.
+      <br><br>
+      <%= link_to "The source code is publicly available here, if you'd like to check.", "https://github.com/dantherussell/f1_local_timing" %>
+    <% end %>
   </body>
 </html>

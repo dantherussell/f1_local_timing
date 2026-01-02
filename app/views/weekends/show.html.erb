@@ -1,0 +1,24 @@
+<h1><%= @weekend.gp_title %></h1>
+<h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
+<h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
+
+<div data-controller="time-toggle" class="time_buttons">
+  <a href="javascript:void(0);" data-action="click->time-toggle#showLocal" data-time-toggle-target="localButton" class="clicked time_button">
+    <h3>Local Times</h3>
+  </a>
+  <a href="javascript:void(0);" data-action="click->time-toggle#showTrack" data-time-toggle-target="trackButton" class="time_button">
+    <h3>Track Times</h3>
+  </a>
+
+  <%= render "local_times" %>
+  <%= render "track_times" %>
+</div>
+
+<br><br>
+<% if cookies[:authed] || Rails.env.development? %>
+  <%= link_to "New Event", new_season_weekend_event_path(@season, @weekend) %> |
+  <%= link_to "Edit Weekend", edit_season_weekend_path(@season, @weekend) %> |
+  <%= link_to "Delete Weekend", season_weekend_path(@season, @weekend), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this weekend?" } %> |
+  <%= link_to "'Print' View", print_season_weekend_path(@season, @weekend) %>
+<% end %>
+<%= link_to 'Back', season_path(@season) %>

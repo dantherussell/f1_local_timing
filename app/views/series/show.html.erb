@@ -1,0 +1,13 @@
+<h1><%= @series.name %></h1>
+
+<% @sessions.each do |session| %>
+  <%= session.name %>
+  | <%= link_to "Edit", edit_series_session_path(@series, session) %> | <%= link_to "Delete", series_session_path(@series, session), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this session?" } %>
+  <br><br>
+<% end %>
+<br><br>
+<% if cookies[:authed] || Rails.env.development? %>
+  <%= link_to "New Session", new_series_session_path(@series) %>
+<% end %>
+<br><br>
+<%= link_to 'Back', series_index_path %>

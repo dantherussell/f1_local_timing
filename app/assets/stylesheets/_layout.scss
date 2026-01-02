@@ -1,0 +1,67 @@
+body {
+  font-family: 'f1-regular', sans-serif;
+  text-align: center;
+}
+
+body.light {
+  color: black;
+  background-color: white;
+
+  a {
+    color: black;
+  }
+}
+
+body.dark {
+  color: white;
+  background-color: black;
+
+  a {
+    color: white;
+  }
+}
+
+h1 {
+  font-family: 'f1-bold', sans-serif;
+}
+
+h3 {
+  font-family: 'f1-bold', sans-serif;
+  font-size: large;
+}
+
+h4 {
+  font-family: 'f1-wide', sans-serif;
+}
+
+.logo {
+  margin-bottom: 2em;
+  margin-top: 2em;
+}
+
+input, select {
+  margin-top: 1em !important;
+}
+
+input[type="text"], input[type="date"], input[type="time"], select {
+  width: 30em;
+}
+
+table {
+  margin: 0 auto;
+  width: 60%;
+
+  th {
+    font-style: italic;
+  }
+}
+
+.f1 {
+  font-weight: 900;
+  color: red;
+}
+
+.notice {
+  color: green;
+  font-weight: bold;
+}

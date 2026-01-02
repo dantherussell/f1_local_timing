@@ -1,0 +1,18 @@
+<h1>Seasons</h1>
+
+<% @seasons.each do |season| %>
+  <%= link_to season.name, season_path(season) %>
+  <% if cookies[:authed] || Rails.env.development? %>
+     | <%= link_to "Edit", edit_season_path(season) %> | <%= link_to "Delete", season_path(season), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this season?" } %>
+  <% end %>
+  <br><br>
+<% end %>
+<br><br>
+<% if Rails.env.production? && !cookies[:authed] %>
+  <%= link_to "Authenticate", auth_path %>
+<% end %>
+<% if cookies[:authed] || Rails.env.development? %>
+  <%= link_to "New Season", new_season_path %> |
+  <%= link_to "Racing Series", series_index_path %>
+<% end %>
+<br><br>

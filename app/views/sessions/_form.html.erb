@@ -1,0 +1,29 @@
+<%= form_with model: [@series, @session] do |f| %>
+  <% if @session.errors.any? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@session.errors.count, "error") %> prohibited this session from being saved:</h2>
+
+      <ul>
+        <% @session.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <br>
+
+  <div class="form-group">
+    <%= f.label :name %> (e.g. "Free Practice 1")
+    <div>
+      <%= f.text_field :name, class: 'form-control' %>
+    </div>
+  </div>
+  <div class="form-group">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<br>
+
+<%= link_to 'Back', series_path(@series) %>
