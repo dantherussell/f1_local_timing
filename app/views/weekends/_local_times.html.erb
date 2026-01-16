@@ -19,7 +19,7 @@
             <td><%= event.session_name %></td>
             <td><%= local_time(event.start_time, "%H:%M") %></td>
             <% if cookies[:authed] || Rails.env.development? %>
-              <td><%= link_to "Edit", edit_season_weekend_event_path(@season, @weekend, event) %> | <%= link_to "Delete", season_weekend_event_path(@season, @weekend, event), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this event?" } %></td>
+              <td><%= link_to "Edit", edit_season_weekend_event_path(@season, @weekend, event) %> | <%= link_to "Delete", season_weekend_event_path(@season, @weekend, event), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this event?", turbo_prefetch: false } %></td>
             <% end %>
           </tr>
         <% end %>

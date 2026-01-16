@@ -2,7 +2,7 @@
 
 <% @sessions.each do |session| %>
   <%= session.name %>
-  | <%= link_to "Edit", edit_series_session_path(@series, session) %> | <%= link_to "Delete", series_session_path(@series, session), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this session?" } %>
+  | <%= link_to "Edit", edit_series_session_path(@series, session) %> | <%= link_to "Delete", series_session_path(@series, session), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this session?", turbo_prefetch: false } %>
   <br><br>
 <% end %>
 <br><br>

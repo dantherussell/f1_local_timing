@@ -3,7 +3,7 @@
 <% @all_series.each do |series| %>
   <%= link_to series.name, series_path(series) %>
   <% if cookies[:authed] || Rails.env.development? %>
-     | <%= link_to "Edit", edit_series_path(series) %> | <%= link_to "Delete", series_path(series), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this series?" } %>
+     | <%= link_to "Edit", edit_series_path(series) %> | <%= link_to "Delete", series_path(series), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this series?", turbo_prefetch: false } %>
   <% end %>
   <br><br>
 <% end %>
