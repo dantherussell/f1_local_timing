@@ -3,6 +3,7 @@ class Weekend < ApplicationRecord
   has_many :events, through: :days
   belongs_to :season
 
+  validate :first_day_before_last_day
   after_save :sync_days
 
   def timespan
@@ -17,8 +18,16 @@ class Weekend < ApplicationRecord
 
   private
 
-  def sync_days
+  def first_day_before_last_day
     return if first_day.blank? || last_day.blank?
+
+    if first_day > last_day
+      errors.add(:first_day, "must be before or equal to last day")
+    end
+  end
+
+  def sync_days
+    return if first_day.blank? || last_day.blank? || first_day > last_day
 
     date_range = (first_day..last_day).to_a
 

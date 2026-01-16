@@ -25,6 +25,29 @@ RSpec.describe Weekend, type: :model do
     end
   end
 
+  describe 'validations' do
+    it 'is valid when first_day is before last_day' do
+      weekend = build(:weekend, first_day: Date.new(2024, 5, 24), last_day: Date.new(2024, 5, 26))
+      expect(weekend).to be_valid
+    end
+
+    it 'is valid when first_day equals last_day' do
+      weekend = build(:weekend, first_day: Date.new(2024, 5, 24), last_day: Date.new(2024, 5, 24))
+      expect(weekend).to be_valid
+    end
+
+    it 'is invalid when first_day is after last_day' do
+      weekend = build(:weekend, first_day: Date.new(2024, 5, 26), last_day: Date.new(2024, 5, 24))
+      expect(weekend).not_to be_valid
+      expect(weekend.errors[:first_day]).to include('must be before or equal to last day')
+    end
+
+    it 'is valid when both dates are blank' do
+      weekend = build(:weekend, first_day: nil, last_day: nil)
+      expect(weekend).to be_valid
+    end
+  end
+
   describe '#timespan' do
     it 'returns formatted date range when same month' do
       weekend = build(:weekend, first_day: Date.new(2024, 5, 24), last_day: Date.new(2024, 5, 26))
