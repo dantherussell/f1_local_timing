@@ -1,6 +1,6 @@
 class SessionsController < ApplicationController
   before_action :set_series
-  before_action :authenticate, except: [:index]
+  before_action :authenticate, except: [ :index ]
 
   def index
     @sessions = @series.sessions

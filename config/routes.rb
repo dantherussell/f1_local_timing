@@ -6,13 +6,13 @@ Rails.application.routes.draw do
   get "auth" => "seasons#auth"
 
   resources :seasons do
-    resources :weekends, except: [:index] do
+    resources :weekends, except: [ :index ] do
       get "print", on: :member
-      resources :events, except: [:index, :show]
+      resources :events, except: [ :index, :show ]
     end
   end
 
   resources :series do
-    resources :sessions, except: [:show]
+    resources :sessions, except: [ :show ]
   end
 end

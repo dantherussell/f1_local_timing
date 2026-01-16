@@ -1,11 +1,32 @@
 FactoryBot.define do
   factory :weekend do
-    gp_title { "MyString" }
-    location { "MyString" }
-    timespan { "MyString" }
-    local_timezone { "MyString" }
-    local_time_offset { "MyString" }
-    race_number { 1 }
-    season { nil }
+    sequence(:gp_title) { |n| "Grand Prix #{n}" }
+    location { "Monaco" }
+    timespan { "May 23-26" }
+    local_timezone { "Europe/Monaco" }
+    local_time_offset { "+02:00" }
+    sequence(:race_number) { |n| n }
+    season
+
+    trait :monaco do
+      gp_title { "Monaco Grand Prix" }
+      location { "Monte Carlo" }
+      local_timezone { "Europe/Monaco" }
+      local_time_offset { "+02:00" }
+    end
+
+    trait :silverstone do
+      gp_title { "British Grand Prix" }
+      location { "Silverstone" }
+      local_timezone { "Europe/London" }
+      local_time_offset { "+01:00" }
+    end
+
+    trait :suzuka do
+      gp_title { "Japanese Grand Prix" }
+      location { "Suzuka" }
+      local_timezone { "Asia/Tokyo" }
+      local_time_offset { "+09:00" }
+    end
   end
 end

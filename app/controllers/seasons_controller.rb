@@ -9,9 +9,9 @@ class SeasonsController < ApplicationController
     @season = Season.find(params[:id])
     @weekends = if @season.weekends.all? { |w| w.race_number.present? }
                   @season.weekends.order(:race_number)
-                else
+    else
                   @season.weekends
-                end
+    end
   end
 
   def new
