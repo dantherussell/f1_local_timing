@@ -38,6 +38,16 @@ RSpec.describe 'Seasons', type: :request do
       get season_path(season)
       expect(response.body).to match(/First GP.*Second GP.*Third GP/m)
     end
+
+    it 'returns weekends without ordering when some lack race numbers' do
+      create(:weekend, season: season, race_number: nil, gp_title: 'GP Without Number')
+      create(:weekend, season: season, race_number: 1, gp_title: 'GP With Number')
+
+      get season_path(season)
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('GP Without Number')
+      expect(response.body).to include('GP With Number')
+    end
   end
 
   describe 'GET /seasons/new' do
@@ -68,6 +78,12 @@ RSpec.describe 'Seasons', type: :request do
       it 'redirects to the new season' do
         post seasons_path, params: { season: { name: '2024 Season' } }, headers: auth_headers
         expect(response).to redirect_to(season_path(Season.last))
+      end
+
+      it 'renders new with errors when create fails' do
+        allow_any_instance_of(Season).to receive(:save).and_return(false)
+        post seasons_path, params: { season: { name: '2024 Season' } }, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end
@@ -103,6 +119,12 @@ RSpec.describe 'Seasons', type: :request do
       it 'redirects to the season' do
         patch season_path(season), params: { season: { name: 'New Name' } }, headers: auth_headers
         expect(response).to redirect_to(season_path(season))
+      end
+
+      it 'renders edit with errors when update fails' do
+        allow_any_instance_of(Season).to receive(:update).and_return(false)
+        patch season_path(season), params: { season: { name: 'New Name' } }, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

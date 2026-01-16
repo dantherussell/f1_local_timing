@@ -1,32 +1,27 @@
 class Event < ApplicationRecord
-  before_save :convert_to_datetime
+  before_save :convert_to_time
 
-  belongs_to :weekend
+  belongs_to :day
   belongs_to :session
+  delegate :weekend, :formatted_date, to: :day
   delegate :series, to: :session, allow_nil: true
 
   def time_offset
-    local_time_offset.blank? ? weekend.local_time_offset : local_time_offset
+    return local_time_offset if local_time_offset.present?
+
+    day.time_offset
   end
 
   def circuit_time
-    start_time.to_datetime.new_offset(time_offset).strftime("%H:%M")
+    start_time.strftime("%H:%M")
   end
 
   def date
-    start_time.to_datetime.new_offset(time_offset).strftime("%A %-d %B")
-  end
-
-  def start_time_date_field
-    start_time.to_date if start_time.present?
+    formatted_date
   end
 
   def start_time_time_field
-    start_time.to_time if start_time.present?
-  end
-
-  def start_time_date_field=(date)
-    @start_time_date_field = Date.parse(date).strftime("%Y-%m-%d")
+    start_time if start_time.present?
   end
 
   def start_time_time_field=(time)
@@ -43,9 +38,9 @@ class Event < ApplicationRecord
 
   private
 
-  def convert_to_datetime
-    return unless @start_time_date_field && @start_time_time_field
+  def convert_to_time
+    return unless @start_time_time_field
 
-    self.start_time = DateTime.parse("#{@start_time_date_field} #{@start_time_time_field}")
+    self.start_time = Time.parse(@start_time_time_field)
   end
 end

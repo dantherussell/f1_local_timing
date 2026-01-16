@@ -21,10 +21,12 @@ RSpec.describe 'Weekends', type: :request do
       expect(response.body).to include(weekend.gp_title)
     end
 
-    it 'groups events by date' do
+    it 'displays events grouped by day' do
       session = create(:session)
-      create(:event, weekend: weekend, session: session, start_time: DateTime.new(2024, 5, 24, 10, 0, 0), name: 'FP1')
-      create(:event, weekend: weekend, session: session, start_time: DateTime.new(2024, 5, 25, 14, 0, 0), name: 'Qualifying')
+      day1 = weekend.days.first
+      day2 = weekend.days.second
+      create(:event, day: day1, session: session, start_time: Time.parse('10:00'), name: 'FP1')
+      create(:event, day: day2, session: session, start_time: Time.parse('14:00'), name: 'Qualifying')
 
       get season_weekend_path(season, weekend)
       expect(response).to have_http_status(:success)
@@ -63,7 +65,8 @@ RSpec.describe 'Weekends', type: :request do
         weekend: {
           gp_title: 'Monaco Grand Prix',
           location: 'Monte Carlo',
-          timespan: 'May 23-26',
+          first_day: '2024-05-24',
+          last_day: '2024-05-26',
           local_timezone: 'Europe/Monaco',
           local_time_offset: '+02:00',
           race_number: 8
@@ -86,6 +89,12 @@ RSpec.describe 'Weekends', type: :request do
       it 'redirects to the weekend' do
         post season_weekends_path(season), params: valid_params, headers: auth_headers
         expect(response).to redirect_to(season_weekend_path(season, Weekend.last))
+      end
+
+      it 'renders new with errors when create fails' do
+        allow_any_instance_of(Weekend).to receive(:save).and_return(false)
+        post season_weekends_path(season), params: valid_params, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end
@@ -121,6 +130,12 @@ RSpec.describe 'Weekends', type: :request do
       it 'redirects to the weekend' do
         patch season_weekend_path(season, weekend), params: { weekend: { gp_title: 'New Title' } }, headers: auth_headers
         expect(response).to redirect_to(season_weekend_path(season, weekend))
+      end
+
+      it 'renders edit with errors when update fails' do
+        allow_any_instance_of(Weekend).to receive(:update).and_return(false)
+        patch season_weekend_path(season, weekend), params: { weekend: { gp_title: 'New Title' } }, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

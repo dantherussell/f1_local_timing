@@ -79,6 +79,12 @@ RSpec.describe 'Series', type: :request do
         post series_index_path, params: { series: { name: 'Formula 1' } }, headers: auth_headers
         expect(response).to redirect_to(series_index_path)
       end
+
+      it 'renders new with errors when create fails' do
+        allow_any_instance_of(Series).to receive(:save).and_return(false)
+        post series_index_path, params: { series: { name: 'Formula 1' } }, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
+      end
     end
   end
 
@@ -113,6 +119,12 @@ RSpec.describe 'Series', type: :request do
       it 'redirects to the series' do
         patch series_path(series), params: { series: { name: 'New Name' } }, headers: auth_headers
         expect(response).to redirect_to(series_path(series))
+      end
+
+      it 'renders edit with errors when update fails' do
+        allow_any_instance_of(Series).to receive(:update).and_return(false)
+        patch series_path(series), params: { series: { name: 'New Name' } }, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

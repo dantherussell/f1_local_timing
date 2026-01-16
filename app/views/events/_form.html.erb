@@ -1,4 +1,4 @@
-<%= form_with model: [@season, @weekend, @event],
+<%= form_with model: [@season, @weekend, @day, @event],
              data: { controller: "cascading-select", cascading_select_selected_session_value: @event.session_id } do |f| %>
   <% if @event.errors.any? %>
     <div id="errorExplanation">
@@ -14,6 +14,10 @@
 
   <br>
 
+  <div class="form-group">
+    <strong>Date:</strong> <%= @day.formatted_date %>
+  </div>
+  <br>
   <div class="form-group">
     <%= label_tag :series_id, "Series" %>
     <div>
@@ -35,13 +39,6 @@
   </div>
   <br>
   <div class="form-group">
-    Date
-    <div>
-      <%= f.date_field :start_time_date_field, class: 'form-control' %>
-    </div>
-    <br>
-  </div>
-  <div class="form-group">
     <%= f.label :start_time %> in UTC
     <div>
       <%= f.time_field :start_time_time_field, class: 'form-control' %>
@@ -49,7 +46,7 @@
     <br>
   </div>
   <div class="form-group">
-    <%= f.label :local_time_offset %> (e.g. "UTC+1" WITHOUT QUOTES)
+    <%= f.label :local_time_offset %> (e.g. "+02:00" - leave blank to use day/weekend default)
     <div>
     <%= f.text_field :local_time_offset, class: 'form-control' %>
     </div>
