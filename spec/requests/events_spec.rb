@@ -7,9 +7,15 @@ RSpec.describe 'Events', type: :request do
   let(:series) { create(:series) }
   let(:session_record) { create(:session, series: series) }
 
-  before do
+  around do |example|
+    orig_username = ENV['ADMIN_USERNAME']
+    orig_password = ENV['ADMIN_PASSWORD']
     ENV['ADMIN_USERNAME'] = 'admin'
     ENV['ADMIN_PASSWORD'] = 'password'
+    example.run
+  ensure
+    ENV['ADMIN_USERNAME'] = orig_username
+    ENV['ADMIN_PASSWORD'] = orig_password
   end
 
   describe 'GET /seasons/:season_id/weekends/:weekend_id/days/:day_id/events/new' do

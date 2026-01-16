@@ -3,9 +3,15 @@ require 'rails_helper'
 RSpec.describe 'Sessions', type: :request do
   let(:series) { create(:series) }
 
-  before do
+  around do |example|
+    orig_username = ENV['ADMIN_USERNAME']
+    orig_password = ENV['ADMIN_PASSWORD']
     ENV['ADMIN_USERNAME'] = 'admin'
     ENV['ADMIN_PASSWORD'] = 'password'
+    example.run
+  ensure
+    ENV['ADMIN_USERNAME'] = orig_username
+    ENV['ADMIN_PASSWORD'] = orig_password
   end
 
   describe 'GET /series/:series_id/sessions' do
