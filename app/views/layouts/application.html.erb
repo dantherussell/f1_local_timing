@@ -37,15 +37,15 @@
     <% unless request.path.include?("print") %>
       <br><br>
       <% if cookies[:theme] == "dark" %>
-        <%= link_to "Light Mode", root_path(theme: "light") %>
+        <%= link_to "Light Mode", root_path(theme: "light"), data: { turbo_prefetch: false } %>
       <% else %>
-        <%= link_to "Dark Mode", root_path(theme: "dark") %>
+        <%= link_to "Dark Mode", root_path(theme: "dark"), data: { turbo_prefetch: false } %>
       <% end %>
 
       <br><br>
       Support development on <%= link_to "Patreon", "https://www.patreon.com/f1furs" %> or on <%= link_to "Ko-fi", "https://ko-fi.com/thatwingwaffl" %>
       <br><br>
-      I legally have to disclose that this website uses cookies. They are used to display the right theme.
+      I legally have to disclose the use of cookies to display the right theme, and to set your local timezone.
       <br><br>
       <%= link_to "The source code is publicly available here, if you'd like to check.", "https://github.com/dantherussell/f1_local_timing" %>
     <% end %>
