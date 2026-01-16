@@ -80,6 +80,4 @@ test:
 #
 production:
   <<: *default
-  database: f1_local_timing_production
-  username: f1_local_timing
-  password: <%= ENV["F1_LOCAL_TIMING_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>

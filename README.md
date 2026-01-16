@@ -67,6 +67,30 @@ For production, set the following:
 | `ADMIN_PASSWORD` | HTTP Basic auth password for admin actions |
 | `RAILS_MASTER_KEY` | Rails credentials master key |
 
+## Heroku Deployment
+
+```bash
+# Create a new Heroku app
+heroku create your-app-name
+
+# Add PostgreSQL
+heroku addons:create heroku-postgresql:essential-0
+
+# Set environment variables
+heroku config:set ADMIN_USERNAME=your_username
+heroku config:set ADMIN_PASSWORD=your_password
+heroku config:set RAILS_MASTER_KEY=$(cat config/master.key)
+
+# Deploy
+git push heroku main
+```
+
+Alternatively, connect GitHub for automatic deployments:
+1. In Heroku Dashboard, go to Deploy tab
+2. Connect to GitHub repository
+3. Enable automatic deploys from `main` branch
+4. Check "Wait for CI to pass before deploy"
+
 ## License
 
 MIT
