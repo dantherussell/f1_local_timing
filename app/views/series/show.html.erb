@@ -6,7 +6,7 @@
   <br><br>
 <% end %>
 <br><br>
-<% if cookies[:authed] || Rails.env.development? %>
+<% if session[:authed] || Rails.env.development? %>
   <%= link_to "New Session", new_series_session_path(@series) %>
 <% end %>
 <br><br>

@@ -4,15 +4,20 @@ class ApplicationController < ActionController::Base
 
   before_action :set_theme
 
+  def test_auth
+    session[:authed] = true
+    head :ok
+  end
+
   private
 
   def authenticate
     return if Rails.env.development?
-    return if cookies[:authed]
+    return if session[:authed]
 
     authenticate_or_request_with_http_basic do |username, password|
       if username == ENV["ADMIN_USERNAME"] && password == ENV["ADMIN_PASSWORD"]
-        cookies[:authed] = { value: "authenticated", expires: 8.days.from_now }
+        session[:authed] = true
         true
       else
         false

@@ -94,8 +94,7 @@ RSpec.describe "Weekend time views", type: :system do
 
   describe "authenticated user" do
     def visit_as_authed(path)
-      visit path
-      page.driver.browser.manage.add_cookie(name: "authed", value: "true")
+      visit "/test_auth"
       visit path
     end
 
