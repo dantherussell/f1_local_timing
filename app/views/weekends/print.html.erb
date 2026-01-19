@@ -2,17 +2,19 @@
 <h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
 <h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
 
-<% @days.each do |day| %>
-  <h4><%= day.formatted_date %></h4>
-  <table>
-    <tbody>
-      <% day.events.order(:start_time).each do |event| %>
+<table>
+  <tbody>
+    <% @weekend.events.includes(:day, :session).sort_by { |e| e.track_datetime || DateTime.new }.group_by(&:track_date).each do |track_date, events| %>
+      <tr class="day-header">
+        <td colspan="3"><h4><%= track_date&.strftime("%A %-d %B") %></h4></td>
+      </tr>
+      <% events.each do |event| %>
         <tr <%= "class=f1".html_safe if event.series_name == "Formula 1" %>>
           <td><%= event.series_name %></td>
           <td><%= event.session_name %></td>
           <td><%= event.circuit_time %></td>
         </tr>
       <% end %>
-    </tbody>
-  </table>
-<% end %>
+    <% end %>
+  </tbody>
+</table>
