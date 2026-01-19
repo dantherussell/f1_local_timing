@@ -2,18 +2,27 @@
 <h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
 <h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
 
+<% authed = cookies[:authed] || Rails.env.development? %>
 <div data-controller="time-toggle">
   <div class="time_buttons">
-    <a href="javascript:void(0);" data-action="click->time-toggle#showLocal" data-time-toggle-target="localButton" class="clicked time_button">
+    <a href="javascript:void(0);" data-action="click->time-toggle#showLocal" data-time-toggle-target="localButton" class="<%= 'clicked ' unless authed %>time_button">
       <h3>Local Times</h3>
     </a>
     <a href="javascript:void(0);" data-action="click->time-toggle#showTrack" data-time-toggle-target="trackButton" class="time_button">
       <h3>Track Times</h3>
     </a>
+    <% if authed %>
+      <a href="javascript:void(0);" data-action="click->time-toggle#showUtc" data-time-toggle-target="utcButton" class="clicked time_button">
+        <h3>UTC Times</h3>
+      </a>
+    <% end %>
   </div>
 
-  <%= render "local_times" %>
-  <%= render "track_times" %>
+  <%= render "local_times", authed: authed %>
+  <%= render "track_times", authed: authed %>
+  <% if authed %>
+    <%= render "utc_times" %>
+  <% end %>
 </div>
 
 <br><br>

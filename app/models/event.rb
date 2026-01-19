@@ -13,7 +13,42 @@ class Event < ApplicationRecord
   end
 
   def circuit_time
-    start_time.strftime("%H:%M")
+    return nil unless track_datetime.present?
+
+    track_datetime.strftime("%H:%M")
+  end
+
+  def track_datetime
+    return nil unless start_datetime.present?
+
+    # Convert UTC datetime to track-local timezone
+    offset = time_offset || "+00:00"
+    start_datetime.new_offset(offset)
+  end
+
+  def track_date
+    return nil unless track_datetime.present?
+
+    track_datetime.to_date
+  end
+
+  def formatted_track_date
+    track_date&.strftime("%A %-d %B")
+  end
+
+  def start_datetime
+    return nil unless start_time.present? && day&.date.present?
+
+    # start_time is stored as UTC, combine with day's date as UTC
+    DateTime.new(
+      day.date.year,
+      day.date.month,
+      day.date.day,
+      start_time.hour,
+      start_time.min,
+      start_time.sec,
+      "+00:00"
+    )
   end
 
   def date
