@@ -2,7 +2,8 @@
   <table>
     <tbody>
       <% @days.each do |day| %>
-        <% first_event = day.events.order(:start_time).first %>
+        <% ordered_events = day.events.order(:start_time) %>
+        <% first_event = ordered_events.first %>
         <% utc_date = first_event&.start_datetime&.to_date %>
         <tr class="day-header">
           <td colspan="4">
@@ -14,7 +15,7 @@
             </p>
           </td>
         </tr>
-        <% day.events.order(:start_time).each do |event| %>
+        <% ordered_events.each do |event| %>
           <tr <%= "class=f1".html_safe if event.series_name == "Formula 1" %>>
             <td><%= event.series_name %></td>
             <td><%= event.session_name %></td>
