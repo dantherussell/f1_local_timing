@@ -1,36 +1,18 @@
-<div id="track_times" data-time-toggle-target="trackTimes">
-  <% @days.each do |day| %>
-    <h4><%= day.formatted_date %></h4>
-    <% if cookies[:authed] || Rails.env.development? %>
-      <p>
-        <%= link_to "Add Event", new_season_weekend_day_event_path(@season, @weekend, day) %> |
-        <%= link_to "Edit Day", edit_season_weekend_day_path(@season, @weekend, day) %> |
-        <%= link_to "Delete Day", season_weekend_day_path(@season, @weekend, day), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this day and all its events?", turbo_prefetch: false } %>
-      </p>
-    <% end %>
-    <table>
-      <thead>
-        <tr>
-          <th>Series</th>
-          <th>Session</th>
-          <th>Start Time</th>
-          <% if cookies[:authed] || Rails.env.development? %>
-            <th></th>
-          <% end %>
+<div id="track_times" data-time-toggle-target="trackTimes" style="display: none;">
+  <table>
+    <tbody>
+      <% @weekend.events.includes(:day, :session).sort_by { |e| e.track_datetime || DateTime.new }.group_by(&:track_date).each do |track_date, events| %>
+        <tr class="day-header">
+          <td colspan="3"><h4><%= track_date&.strftime("%A %-d %B") %></h4></td>
         </tr>
-      </thead>
-      <tbody>
-        <% day.events.order(:start_time).each do |event| %>
+        <% events.each do |event| %>
           <tr <%= "class=f1".html_safe if event.series_name == "Formula 1" %>>
             <td><%= event.series_name %></td>
             <td><%= event.session_name %></td>
             <td><%= event.circuit_time %></td>
-            <% if cookies[:authed] || Rails.env.development? %>
-              <td><%= link_to "Edit", edit_season_weekend_day_event_path(@season, @weekend, day, event) %> | <%= link_to "Delete", season_weekend_day_event_path(@season, @weekend, day, event), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this event?", turbo_prefetch: false } %></td>
-            <% end %>
           </tr>
         <% end %>
-      </tbody>
-    </table>
-  <% end %>
+      <% end %>
+    </tbody>
+  </table>
 </div>

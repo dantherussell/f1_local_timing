@@ -49,19 +49,52 @@ RSpec.describe Weekend, type: :model do
   end
 
   describe '#timespan' do
-    it 'returns formatted date range when same month' do
-      weekend = build(:weekend, first_day: Date.new(2024, 5, 24), last_day: Date.new(2024, 5, 26))
-      expect(weekend.timespan).to eq('24-26 May')
+    context 'when no events exist' do
+      it 'returns formatted date range when same month' do
+        weekend = build(:weekend, first_day: Date.new(2024, 5, 24), last_day: Date.new(2024, 5, 26))
+        expect(weekend.timespan).to eq('24-26 May')
+      end
+
+      it 'returns formatted date range when different months' do
+        weekend = build(:weekend, first_day: Date.new(2024, 3, 29), last_day: Date.new(2024, 4, 1))
+        expect(weekend.timespan).to eq('29 March - 1 April')
+      end
+
+      it 'returns nil when dates are blank' do
+        weekend = build(:weekend, first_day: nil, last_day: nil)
+        expect(weekend.timespan).to be_nil
+      end
     end
 
-    it 'returns formatted date range when different months' do
-      weekend = build(:weekend, first_day: Date.new(2024, 3, 29), last_day: Date.new(2024, 4, 1))
-      expect(weekend.timespan).to eq('29 March - 1 April')
-    end
+    context 'when events exist' do
+      it 'uses track dates from first and last events' do
+        weekend = create(:weekend, first_day: Date.new(2024, 11, 20), last_day: Date.new(2024, 11, 22), local_time_offset: '+02:00')
+        day1 = weekend.days.find_by(date: Date.new(2024, 11, 20))
+        day2 = weekend.days.find_by(date: Date.new(2024, 11, 22))
+        session = create(:session)
 
-    it 'returns nil when dates are blank' do
-      weekend = build(:weekend, first_day: nil, last_day: nil)
-      expect(weekend.timespan).to be_nil
+        # First event: UTC 08:00 on Nov 20 = 10:00 track time on Nov 20
+        create(:event, day: day1, session: session, start_time: Time.parse('08:00'))
+        # Last event: UTC 14:00 on Nov 22 = 16:00 track time on Nov 22
+        create(:event, day: day2, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.timespan).to eq('20-22 November')
+      end
+
+      it 'adjusts dates when timezone shifts events to different days' do
+        # UTC-8 timezone (e.g., Las Vegas)
+        weekend = create(:weekend, first_day: Date.new(2024, 11, 20), last_day: Date.new(2024, 11, 22), local_time_offset: '-08:00')
+        day1 = weekend.days.find_by(date: Date.new(2024, 11, 20))
+        day2 = weekend.days.find_by(date: Date.new(2024, 11, 22))
+        session = create(:session)
+
+        # First event: UTC 02:00 on Nov 20 = 18:00 track time on Nov 19 (previous day!)
+        create(:event, day: day1, session: session, start_time: Time.parse('02:00'))
+        # Last event: UTC 06:00 on Nov 22 = 22:00 track time on Nov 21 (previous day!)
+        create(:event, day: day2, session: session, start_time: Time.parse('06:00'))
+
+        expect(weekend.timespan).to eq('19-21 November')
+      end
     end
   end
 

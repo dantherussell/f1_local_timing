@@ -7,12 +7,31 @@ class Weekend < ApplicationRecord
   after_save :sync_days
 
   def timespan
-    return nil if first_day.blank? || last_day.blank?
+    first_date, last_date = local_date_range
 
-    if first_day.month == last_day.month
-      "#{first_day.day}-#{last_day.day} #{first_day.strftime('%B')}"
+    return nil if first_date.blank? || last_date.blank?
+
+    if first_date.month == last_date.month
+      "#{first_date.day}-#{last_date.day} #{first_date.strftime('%B')}"
     else
-      "#{first_day.strftime('%-d %B')} - #{last_day.strftime('%-d %B')}"
+      "#{first_date.strftime('%-d %B')} - #{last_date.strftime('%-d %B')}"
+    end
+  end
+
+  def local_date_range
+    if events.any?
+      # Use actual event times converted to track timezone
+      sorted_events = events.includes(:day).sort_by { |e| e.start_datetime || DateTime.new }
+      first_event = sorted_events.first
+      last_event = sorted_events.last
+
+      first_date = first_event&.track_date
+      last_date = last_event&.track_date
+
+      [ first_date, last_date ]
+    else
+      # Fall back to UTC dates
+      [ first_day, last_day ]
     end
   end
 

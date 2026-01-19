@@ -1,0 +1,29 @@
+<div id="utc_times" data-time-toggle-target="utcTimes">
+  <table>
+    <tbody>
+      <% @days.each do |day| %>
+        <% ordered_events = day.events.order(:start_time) %>
+        <% first_event = ordered_events.first %>
+        <% utc_date = first_event&.start_datetime&.to_date %>
+        <tr class="day-header">
+          <td colspan="4">
+            <h4><%= utc_date&.strftime("%A %-d %B") || day.formatted_date %> (UTC)</h4>
+            <p>
+              <%= link_to "Add Event", new_season_weekend_day_event_path(@season, @weekend, day) %> |
+              <%= link_to "Edit Day", edit_season_weekend_day_path(@season, @weekend, day) %> |
+              <%= link_to "Delete Day", season_weekend_day_path(@season, @weekend, day), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this day and all its events?", turbo_prefetch: false } %>
+            </p>
+          </td>
+        </tr>
+        <% ordered_events.each do |event| %>
+          <tr <%= "class=f1".html_safe if event.series_name == "Formula 1" %>>
+            <td><%= event.series_name %></td>
+            <td><%= event.session_name %></td>
+            <td><%= event.start_datetime&.strftime("%H:%M") %></td>
+            <td><%= link_to "Edit", edit_season_weekend_day_event_path(@season, @weekend, day, event) %> | <%= link_to "Delete", season_weekend_day_event_path(@season, @weekend, day, event), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this event?", turbo_prefetch: false } %></td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+</div>

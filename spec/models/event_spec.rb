@@ -64,9 +64,70 @@ RSpec.describe Event, type: :model do
   end
 
   describe '#circuit_time' do
-    it 'returns the time formatted' do
-      event = build(:event, start_time: Time.parse('14:00'))
-      expect(event.circuit_time).to eq('14:00')
+    it 'converts UTC time to track-local time' do
+      weekend = build(:weekend, local_time_offset: '+02:00')
+      day = build(:day, weekend: weekend, date: Date.new(2024, 5, 26))
+      event = build(:event, day: day, start_time: Time.parse('14:00'))
+      # 14:00 UTC + 2 hours = 16:00 track time
+      expect(event.circuit_time).to eq('16:00')
+    end
+
+    it 'handles negative offsets correctly' do
+      weekend = build(:weekend, local_time_offset: '-08:00')
+      day = build(:day, weekend: weekend, date: Date.new(2024, 11, 20))
+      event = build(:event, day: day, start_time: Time.parse('00:30'))
+      # 00:30 UTC - 8 hours = 16:30 track time (previous day)
+      expect(event.circuit_time).to eq('16:30')
+    end
+
+    it 'returns nil when start_time is missing' do
+      event = build(:event, start_time: nil)
+      expect(event.circuit_time).to be_nil
+    end
+  end
+
+  describe '#track_datetime' do
+    it 'converts UTC datetime to track timezone' do
+      weekend = build(:weekend, local_time_offset: '+02:00')
+      day = build(:day, weekend: weekend, date: Date.new(2024, 5, 26))
+      event = build(:event, day: day, start_time: Time.parse('14:00'))
+
+      expect(event.track_datetime.hour).to eq(16)
+      expect(event.track_datetime.offset).to eq(Rational(2, 24))
+    end
+
+    it 'returns nil when start_datetime is nil' do
+      event = build(:event, start_time: nil)
+      expect(event.track_datetime).to be_nil
+    end
+  end
+
+  describe '#track_date' do
+    it 'returns the date in track timezone' do
+      weekend = build(:weekend, local_time_offset: '-08:00')
+      day = build(:day, weekend: weekend, date: Date.new(2024, 11, 20))
+      event = build(:event, day: day, start_time: Time.parse('00:30'))
+      # 00:30 UTC on Nov 20 = 16:30 on Nov 19 at track (UTC-8)
+      expect(event.track_date).to eq(Date.new(2024, 11, 19))
+    end
+
+    it 'returns nil when track_datetime is nil' do
+      event = build(:event, start_time: nil)
+      expect(event.track_date).to be_nil
+    end
+  end
+
+  describe '#formatted_track_date' do
+    it 'returns the formatted date in track timezone' do
+      weekend = build(:weekend, local_time_offset: '-08:00')
+      day = build(:day, weekend: weekend, date: Date.new(2024, 11, 20))
+      event = build(:event, day: day, start_time: Time.parse('00:30'))
+      expect(event.formatted_track_date).to eq('Tuesday 19 November')
+    end
+
+    it 'returns nil when track_date is nil' do
+      event = build(:event, start_time: nil)
+      expect(event.formatted_track_date).to be_nil
     end
   end
 
