@@ -3,9 +3,15 @@ require 'rails_helper'
 RSpec.describe 'Sessions', type: :request do
   let(:series) { create(:series) }
 
-  before do
+  around do |example|
+    orig_username = ENV['ADMIN_USERNAME']
+    orig_password = ENV['ADMIN_PASSWORD']
     ENV['ADMIN_USERNAME'] = 'admin'
     ENV['ADMIN_PASSWORD'] = 'password'
+    example.run
+  ensure
+    ENV['ADMIN_USERNAME'] = orig_username
+    ENV['ADMIN_PASSWORD'] = orig_password
   end
 
   describe 'GET /series/:series_id/sessions' do
@@ -61,6 +67,12 @@ RSpec.describe 'Sessions', type: :request do
         post series_sessions_path(series), params: { session: { name: 'Practice 1' } }, headers: auth_headers
         expect(response).to redirect_to(series_path(series))
       end
+
+      it 'renders new with errors when create fails' do
+        allow_any_instance_of(Session).to receive(:save).and_return(false)
+        post series_sessions_path(series), params: { session: { name: 'Practice 1' } }, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
+      end
     end
   end
 
@@ -95,6 +107,12 @@ RSpec.describe 'Sessions', type: :request do
       it 'redirects to the series' do
         patch series_session_path(series, session_record), params: { session: { name: 'New Name' } }, headers: auth_headers
         expect(response).to redirect_to(series_path(series))
+      end
+
+      it 'renders edit with errors when update fails' do
+        allow_any_instance_of(Session).to receive(:update).and_return(false)
+        patch series_session_path(series, session_record), params: { session: { name: 'New Name' } }, headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

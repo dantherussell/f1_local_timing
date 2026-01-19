@@ -2,7 +2,8 @@ FactoryBot.define do
   factory :weekend do
     sequence(:gp_title) { |n| "Grand Prix #{n}" }
     location { "Monaco" }
-    timespan { "May 23-26" }
+    first_day { Date.new(2024, 5, 24) }
+    last_day { Date.new(2024, 5, 26) }
     local_timezone { "Europe/Monaco" }
     local_time_offset { "+02:00" }
     sequence(:race_number) { |n| n }

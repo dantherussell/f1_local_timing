@@ -4,13 +4,12 @@ class WeekendsController < ApplicationController
 
   def show
     @weekend = @season.weekends.find(params[:id])
-    @local_events = @weekend.events.order(:start_time).group_by { |e| e.start_time.in_time_zone.strftime("%A %-d %B") }
-    @track_events = @weekend.events.order(:start_time).group_by(&:date)
+    @days = @weekend.days.includes(:events).order(:date)
   end
 
   def print
     @weekend = @season.weekends.find(params[:id])
-    @track_events = @weekend.events.order(:start_time).group_by(&:date)
+    @days = @weekend.days.includes(:events).order(:date)
     render layout: "print"
   end
 
@@ -53,6 +52,6 @@ class WeekendsController < ApplicationController
   end
 
   def weekend_params
-    params.require(:weekend).permit(:gp_title, :location, :timespan, :local_timezone, :local_time_offset, :race_number, :season_id)
+    params.require(:weekend).permit(:gp_title, :location, :first_day, :last_day, :local_timezone, :local_time_offset, :race_number, :season_id)
   end
 end

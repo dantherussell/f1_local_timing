@@ -1,0 +1,30 @@
+<%= form_with model: [@season, @weekend, @day] do |f| %>
+  <% if @day.errors.any? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@day.errors.count, "error") %> prohibited this day from being saved:</h2>
+
+      <ul>
+        <% @day.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <br>
+
+  <div class="form-group">
+    <%= f.label :local_time_offset %> (e.g. "+02:00" - leave blank to use weekend default)
+    <div>
+      <%= f.text_field :local_time_offset, class: 'form-control' %>
+    </div>
+  </div>
+  <br>
+  <div class="form-group">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<br>
+
+<%= link_to 'Back', season_weekend_path(@season, @weekend) %>

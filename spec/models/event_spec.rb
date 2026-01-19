@@ -2,8 +2,23 @@ require 'rails_helper'
 
 RSpec.describe Event, type: :model do
   describe 'associations' do
-    it { is_expected.to belong_to(:weekend) }
+    it { is_expected.to belong_to(:day) }
     it { is_expected.to belong_to(:session) }
+  end
+
+  describe 'delegations' do
+    it 'delegates weekend to day' do
+      weekend = create(:weekend)
+      day = weekend.days.first
+      event = build(:event, day: day)
+      expect(event.weekend).to eq(weekend)
+    end
+
+    it 'delegates formatted_date to day' do
+      day = build(:day, date: Date.new(2024, 5, 26))
+      event = build(:event, day: day)
+      expect(event.formatted_date).to eq('Sunday 26 May')
+    end
   end
 
   describe 'factory' do
@@ -22,53 +37,50 @@ RSpec.describe Event, type: :model do
     end
 
     context 'when event has no local_time_offset' do
-      it 'returns the weekend offset' do
-        weekend = build(:weekend, local_time_offset: '+02:00')
-        event = build(:event, weekend: weekend, local_time_offset: nil)
+      it 'returns the day offset' do
+        day = build(:day, local_time_offset: '+02:00')
+        event = build(:event, day: day, local_time_offset: nil)
         expect(event.time_offset).to eq('+02:00')
       end
     end
 
-    context 'when event has blank local_time_offset' do
+    context 'when event and day have no local_time_offset' do
       it 'returns the weekend offset' do
         weekend = build(:weekend, local_time_offset: '+09:00')
-        event = build(:event, weekend: weekend, local_time_offset: '')
+        day = build(:day, weekend: weekend, local_time_offset: nil)
+        event = build(:event, day: day, local_time_offset: nil)
+        expect(event.time_offset).to eq('+09:00')
+      end
+    end
+
+    context 'when event has blank local_time_offset' do
+      it 'returns the day offset' do
+        weekend = build(:weekend, local_time_offset: '+09:00')
+        day = build(:day, weekend: weekend, local_time_offset: nil)
+        event = build(:event, day: day, local_time_offset: '')
         expect(event.time_offset).to eq('+09:00')
       end
     end
   end
 
   describe '#circuit_time' do
-    it 'returns the time in the local timezone format' do
-      weekend = build(:weekend, local_time_offset: '+02:00')
-      event = build(:event, weekend: weekend, start_time: DateTime.new(2024, 5, 26, 12, 0, 0, '+00:00'), local_time_offset: nil)
+    it 'returns the time formatted' do
+      event = build(:event, start_time: Time.parse('14:00'))
       expect(event.circuit_time).to eq('14:00')
     end
   end
 
   describe '#date' do
-    it 'returns the date formatted with day of week' do
-      weekend = build(:weekend, local_time_offset: '+02:00')
-      event = build(:event, weekend: weekend, start_time: DateTime.new(2024, 5, 26, 14, 0, 0, '+02:00'), local_time_offset: nil)
+    it 'returns the formatted date from day' do
+      day = build(:day, date: Date.new(2024, 5, 26))
+      event = build(:event, day: day)
       expect(event.date).to eq('Sunday 26 May')
     end
   end
 
-  describe '#start_time_date_field' do
-    it 'returns the date portion of start_time' do
-      event = build(:event, start_time: DateTime.new(2024, 5, 26, 14, 0, 0))
-      expect(event.start_time_date_field).to eq(Date.new(2024, 5, 26))
-    end
-
-    it 'returns nil when start_time is nil' do
-      event = build(:event, start_time: nil)
-      expect(event.start_time_date_field).to be_nil
-    end
-  end
-
   describe '#start_time_time_field' do
-    it 'returns the time portion of start_time' do
-      event = build(:event, start_time: DateTime.new(2024, 5, 26, 14, 30, 0))
+    it 'returns start_time when present' do
+      event = build(:event, start_time: Time.parse('14:30'))
       expect(event.start_time_time_field.strftime('%H:%M')).to eq('14:30')
     end
 
@@ -118,14 +130,6 @@ RSpec.describe Event, type: :model do
   end
 
   describe 'virtual attributes for form fields' do
-    describe '#start_time_date_field=' do
-      it 'stores the date string' do
-        event = Event.new
-        event.start_time_date_field = '2024-05-26'
-        expect(event.instance_variable_get(:@start_time_date_field)).to eq('2024-05-26')
-      end
-    end
-
     describe '#start_time_time_field=' do
       it 'stores the time string' do
         event = Event.new
@@ -136,15 +140,11 @@ RSpec.describe Event, type: :model do
   end
 
   describe 'before_save callback' do
-    it 'converts date and time fields to datetime on save' do
+    it 'converts time field to time on save' do
       event = build(:event)
-      event.start_time_date_field = '2024-06-15'
       event.start_time_time_field = '15:00'
       event.save!
 
-      expect(event.start_time.year).to eq(2024)
-      expect(event.start_time.month).to eq(6)
-      expect(event.start_time.day).to eq(15)
       expect(event.start_time.hour).to eq(15)
       expect(event.start_time.min).to eq(0)
     end

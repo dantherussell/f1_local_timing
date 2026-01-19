@@ -32,9 +32,15 @@
     </div>
   </div><br>
   <div class="form-group">
-    <%= f.label :timespan %> (e.g. "10th - 12th July")
+    <%= f.label :first_day %>
     <div>
-    <%= f.text_field :timespan, class: 'form-control' %>
+    <%= f.date_field :first_day, class: 'form-control' %>
+    </div>
+  </div><br>
+  <div class="form-group">
+    <%= f.label :last_day %>
+    <div>
+    <%= f.date_field :last_day, class: 'form-control' %>
     </div>
   </div><br>
   <div class="form-group">

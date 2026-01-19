@@ -2,9 +2,9 @@ FactoryBot.define do
   factory :event do
     racing_class { "Formula 1" }
     name { "Race" }
-    start_time { DateTime.new(2024, 5, 26, 14, 0, 0) }
+    start_time { Time.parse("14:00") }
     local_time_offset { nil }
-    weekend
+    day
     session
 
     trait :with_local_offset do
@@ -13,17 +13,17 @@ FactoryBot.define do
 
     trait :practice do
       name { "Practice 1" }
-      start_time { DateTime.new(2024, 5, 24, 13, 30, 0) }
+      start_time { Time.parse("13:30") }
     end
 
     trait :qualifying do
       name { "Qualifying" }
-      start_time { DateTime.new(2024, 5, 25, 15, 0, 0) }
+      start_time { Time.parse("15:00") }
     end
 
     trait :race do
       name { "Race" }
-      start_time { DateTime.new(2024, 5, 26, 14, 0, 0) }
+      start_time { Time.parse("14:00") }
     end
   end
 end
