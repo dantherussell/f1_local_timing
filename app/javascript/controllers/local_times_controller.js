@@ -5,6 +5,7 @@ export default class extends Controller {
 
   connect() {
     this.groupEventsByLocalDate()
+    this.applyTimeBasedStyling()
   }
 
   groupEventsByLocalDate() {
@@ -60,6 +61,29 @@ export default class extends Controller {
       group.rows.forEach(row => {
         tbody.appendChild(row)
       })
+    })
+  }
+
+  applyTimeBasedStyling() {
+    const now = new Date()
+    const events = Array.from(this.element.querySelectorAll('tr[data-utc-time]'))
+
+    // Clear any stale styling before recalculating
+    events.forEach(row => {
+      row.classList.remove('past-event', 'next-event')
+    })
+
+    events.sort((a, b) => new Date(a.dataset.utcTime) - new Date(b.dataset.utcTime))
+
+    let nextFound = false
+    events.forEach(row => {
+      const eventTime = new Date(row.dataset.utcTime)
+      if (eventTime < now) {
+        row.classList.add('past-event')
+      } else if (!nextFound) {
+        row.classList.add('next-event')
+        nextFound = true
+      }
     })
   }
 }

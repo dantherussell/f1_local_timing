@@ -10,7 +10,14 @@
   pointer-events: none;
   text-decoration: none;
   font-weight: bolder;
-  color: red !important;
+}
+
+body.light .clicked {
+  color: #cc0000 !important;
+}
+
+body.dark .clicked {
+  color: #ff3333 !important;
 }
 
 .time_buttons {
@@ -20,4 +27,122 @@
 .time_button {
   display: inline-flex;
   padding-inline: 5em;
+}
+
+// Muted colours for past events (WCAG AA compliant - 4.5:1 contrast ratio)
+body.light tr.past-event,
+body.light a.past-weekend {
+  color: #727272;
+}
+
+body.dark tr.past-event,
+body.dark a.past-weekend {
+  color: #949494;
+}
+
+tr.next-event td:first-child::before {
+  content: "⏭ ";
+  position: relative;
+  top: -0.05em;
+}
+
+body.light tr.next-event td:first-child::before {
+  color: #008800;
+}
+
+body.dark tr.next-event td:first-child::before {
+  color: #00c800;
+}
+
+.countdown-container {
+  margin: 1em 0;
+}
+
+.countdown-label {
+  font-family: 'f1-wide', sans-serif;
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+body.light .countdown-label {
+  color: #008800;
+}
+
+body.dark .countdown-label {
+  color: #00c800;
+}
+
+.simply-countdown {
+  display: flex;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+.simply-countdown > .simply-section {
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  min-width: 4em;
+}
+
+body.light .simply-countdown > .simply-section {
+  background-color: rgba(0, 200, 0, 0.1);
+}
+
+body.dark .simply-countdown > .simply-section {
+  background-color: rgba(0, 200, 0, 0.2);
+}
+
+.simply-countdown .simply-amount {
+  font-family: 'f1-bold', sans-serif;
+  font-size: 1.5em;
+  display: block;
+}
+
+body.light .simply-countdown .simply-amount {
+  color: #008800;
+}
+
+body.dark .simply-countdown .simply-amount {
+  color: #00c800;
+}
+
+.simply-countdown .simply-word {
+  font-family: 'f1-regular', sans-serif;
+  font-size: 0.8em;
+  display: block;
+}
+
+.sprint-badge {
+  font-family: 'f1-bold', sans-serif;
+  font-size: 0.6em;
+  padding: 0.2em 0.5em;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-left: 0.5em;
+  background-color: #ff8c00;
+  color: black;
+}
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .time_button {
+    padding-inline: 0.5em;
+  }
+
+  .countdown-label {
+    font-size: 0.85em;
+  }
+
+  .simply-countdown > .simply-section {
+    min-width: 3em;
+    padding: 0.4em 0.6em;
+  }
+
+  .simply-countdown .simply-amount {
+    font-size: 1.2em;
+  }
+
+  .simply-countdown .simply-word {
+    font-size: 0.7em;
+  }
 }

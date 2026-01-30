@@ -1,6 +1,16 @@
-<h1><%= @weekend.gp_title %></h1>
+<h1><%= @weekend.gp_title %><% if @weekend.sprint? %> <span class="sprint-badge">SPRINT</span><% end %></h1>
 <h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
 <h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
+
+<% if @next_event && @show_countdown %>
+  <div class="countdown-container"
+       data-controller="countdown"
+       data-countdown-target-time-value="<%= @next_event.start_datetime.iso8601 %>"
+       data-countdown-session-name-value="<%= @next_event.session_name %> (<%= @next_event.series_name %>)">
+    <h3 class="countdown-label"><%= @next_event.session_name %> (<%= @next_event.series_name %>) starts in</h3>
+    <div class="simply-countdown" data-countdown-target="timer"></div>
+  </div>
+<% end %>
 
 <% authed = authenticated? %>
 <div data-controller="time-toggle">

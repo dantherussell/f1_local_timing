@@ -134,4 +134,172 @@ RSpec.describe Weekend, type: :model do
       expect(weekend.days.count).to eq(0)
     end
   end
+
+  describe '#past?' do
+    context 'when weekend has no events' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        expect(weekend.past?).to be false
+      end
+    end
+
+    context 'when last event has no start_datetime' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: nil)
+        expect(weekend.past?).to be false
+      end
+    end
+
+    context 'when last event is in the past' do
+      it 'returns true' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        expect(weekend.past?).to be true
+      end
+    end
+
+    context 'when last event is in the future' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        expect(weekend.past?).to be false
+      end
+    end
+
+    context 'with multiple events spanning days' do
+      it 'uses the last event to determine if past' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.tomorrow)
+        day_past = weekend.days.find_by(date: Date.yesterday)
+        day_future = weekend.days.find_by(date: Date.tomorrow)
+        session = create(:session)
+
+        create(:event, day: day_past, session: session, start_time: Time.parse('10:00'))
+        create(:event, day: day_future, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.past?).to be false
+      end
+    end
+  end
+
+  describe '#next_event' do
+    context 'when weekend has no events' do
+      it 'returns nil' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        expect(weekend.next_event).to be_nil
+      end
+    end
+
+    context 'when all events are in the past' do
+      it 'returns nil' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        expect(weekend.next_event).to be_nil
+      end
+    end
+
+    context 'when all events are in the future' do
+      it 'returns the first event' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session)
+        event1 = create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        create(:event, day: day, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.next_event).to eq(event1)
+      end
+    end
+
+    context 'with mix of past and future events' do
+      it 'returns the first future event' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.tomorrow)
+        day_past = weekend.days.find_by(date: Date.yesterday)
+        day_future = weekend.days.find_by(date: Date.tomorrow)
+        session = create(:session)
+
+        create(:event, day: day_past, session: session, start_time: Time.parse('10:00'))
+        future_event = create(:event, day: day_future, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.next_event).to eq(future_event)
+      end
+    end
+
+    context 'when event has no start_datetime' do
+      it 'skips events without start_datetime' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: nil)
+        event_with_time = create(:event, day: day, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.next_event).to eq(event_with_time)
+      end
+    end
+  end
+
+  describe '#sprint?' do
+    context 'when weekend has no events' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        expect(weekend.sprint?).to be false
+      end
+    end
+
+    context 'when weekend has no Sprint Qualifying session' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session, name: "Race")
+        create(:event, day: day, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.sprint?).to be false
+      end
+    end
+
+    context 'when weekend has a Sprint Qualifying session' do
+      it 'returns true' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        sprint_quali = create(:session, name: "Sprint Qualifying")
+        create(:event, day: day, session: sprint_quali, start_time: Time.parse('10:00'))
+
+        expect(weekend.sprint?).to be true
+      end
+    end
+
+    context 'when session name has different casing' do
+      it 'returns true regardless of case' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        sprint_quali = create(:session, name: "SPRINT QUALIFYING")
+        create(:event, day: day, session: sprint_quali, start_time: Time.parse('10:00'))
+
+        expect(weekend.sprint?).to be true
+      end
+    end
+
+    context 'when weekend has multiple events including Sprint Qualifying' do
+      it 'returns true' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        practice = create(:session, name: "Practice 1")
+        sprint_quali = create(:session, name: "Sprint Qualifying")
+        race = create(:session, name: "Race")
+
+        create(:event, day: day, session: practice, start_time: Time.parse('08:00'))
+        create(:event, day: day, session: sprint_quali, start_time: Time.parse('10:00'))
+        create(:event, day: day, session: race, start_time: Time.parse('14:00'))
+
+        expect(weekend.sprint?).to be true
+      end
+    end
+  end
 end

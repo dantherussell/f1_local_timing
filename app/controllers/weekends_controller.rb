@@ -5,6 +5,8 @@ class WeekendsController < ApplicationController
   def show
     @weekend = @season.weekends.find(params[:id])
     @days = @weekend.days.includes(:events).order(:date)
+    @next_event = @weekend.next_event
+    @show_countdown = show_countdown?
   end
 
   def print
@@ -53,5 +55,12 @@ class WeekendsController < ApplicationController
 
   def weekend_params
     params.require(:weekend).permit(:gp_title, :location, :first_day, :last_day, :local_timezone, :local_time_offset, :race_number, :season_id)
+  end
+
+  def show_countdown?
+    return false unless @next_event&.start_datetime
+
+    hours_until = (@next_event.start_datetime.to_time - Time.current) / 1.hour
+    hours_until <= 24 && hours_until > 0
   end
 end
