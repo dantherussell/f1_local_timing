@@ -9,6 +9,11 @@ class ApplicationController < ActionController::Base
     head :ok
   end
 
+  def authenticated?
+    session[:authed] || Rails.env.development?
+  end
+  helper_method :authenticated?
+
   private
 
   def authenticate

@@ -5,7 +5,7 @@
   <br><br>
 <% end %>
 <br><br>
-<% if session[:authed] || Rails.env.development? %>
+<% if authenticated? %>
   <%= link_to "New Weekend", new_season_weekend_path(@season) %>
 <% end %>
 <br><br>

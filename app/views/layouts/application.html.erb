@@ -20,11 +20,7 @@
   <body class="<%= cookies[:theme] || 'light' %>">
     <div class="logo">
       <%= link_to root_path do %>
-        <% if cookies[:theme] == "dark" %>
-          <%= image_tag "f1_furs_dark.png", size: '424x56', alt: "" %>
-        <% else %>
-          <%= image_tag "f1_furs_light.png", size: '424x56', alt: "" %>
-        <% end %>
+        <%= theme_logo_image %>
       <% end %>
     </div>
 
@@ -34,13 +30,9 @@
 
     <%= yield %>
 
-    <% unless request.path.include?("print") %>
+    <% unless print_view? %>
       <br><br>
-      <% if cookies[:theme] == "dark" %>
-        <%= link_to "Light Mode", root_path(theme: "light"), data: { turbo_prefetch: false } %>
-      <% else %>
-        <%= link_to "Dark Mode", root_path(theme: "dark"), data: { turbo_prefetch: false } %>
-      <% end %>
+      <%= theme_toggle_link %>
 
       <br><br>
       Support development on <%= link_to "Patreon", "https://www.patreon.com/f1furs" %> or on <%= link_to "Ko-fi", "https://ko-fi.com/thatwingwaffl" %>
