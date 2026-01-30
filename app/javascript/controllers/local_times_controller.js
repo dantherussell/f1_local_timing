@@ -5,6 +5,7 @@ export default class extends Controller {
 
   connect() {
     this.groupEventsByLocalDate()
+    this.applyTimeBasedStyling()
   }
 
   groupEventsByLocalDate() {
@@ -60,6 +61,15 @@ export default class extends Controller {
       group.rows.forEach(row => {
         tbody.appendChild(row)
       })
+    })
+  }
+
+  applyTimeBasedStyling() {
+    const now = new Date()
+    this.element.querySelectorAll('tr[data-utc-time]').forEach(row => {
+      if (new Date(row.dataset.utcTime) < now) {
+        row.classList.add('past-event')
+      }
     })
   }
 }

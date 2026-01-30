@@ -210,4 +210,42 @@ RSpec.describe Event, type: :model do
       expect(event.start_time.min).to eq(0)
     end
   end
+
+  describe '#past?' do
+    context 'when event has no start_datetime' do
+      it 'returns false' do
+        event = build(:event, start_time: nil)
+        expect(event.past?).to be false
+      end
+    end
+
+    context 'when event start_datetime is in the past' do
+      it 'returns true' do
+        weekend = build(:weekend)
+        day = build(:day, weekend: weekend, date: Date.yesterday)
+        event = build(:event, day: day, start_time: Time.parse('10:00'))
+        expect(event.past?).to be true
+      end
+    end
+
+    context 'when event start_datetime is in the future' do
+      it 'returns false' do
+        weekend = build(:weekend)
+        day = build(:day, weekend: weekend, date: Date.tomorrow)
+        event = build(:event, day: day, start_time: Time.parse('10:00'))
+        expect(event.past?).to be false
+      end
+    end
+
+    context 'when event start_datetime is now' do
+      it 'returns false' do
+        weekend = build(:weekend)
+        day = build(:day, weekend: weekend, date: Date.current)
+        # Set time slightly in the future to ensure it's not past
+        future_time = (Time.current + 1.hour).strftime('%H:%M')
+        event = build(:event, day: day, start_time: Time.parse(future_time))
+        expect(event.past?).to be false
+      end
+    end
+  end
 end

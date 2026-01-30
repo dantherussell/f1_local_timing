@@ -32,6 +32,15 @@ class Weekend < ApplicationRecord
     end
   end
 
+  def past?
+    return false unless events.exists?
+
+    last_event = events.includes(:day).order("days.date DESC, events.start_time DESC").first
+    return false unless last_event&.start_datetime.present?
+
+    last_event.start_datetime.to_time < Time.current
+  end
+
   private
 
   def first_day_before_last_day

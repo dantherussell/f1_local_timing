@@ -71,6 +71,12 @@ class Event < ApplicationRecord
     session&.name || name
   end
 
+  def past?
+    return false unless start_datetime.present?
+
+    start_datetime.to_time < Time.current
+  end
+
   private
 
   def convert_to_time

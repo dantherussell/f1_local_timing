@@ -1,7 +1,9 @@
 <h1><%= @season.name %> - Race Weekends</h1>
 
 <% @weekends.each do |weekend| %>
-  <%= link_to "#{weekend.gp_title} - #{weekend.timespan}", season_weekend_path(@season, weekend) %>
+  <%= link_to "#{weekend.gp_title} - #{weekend.timespan}",
+      season_weekend_path(@season, weekend),
+      class: weekend.past? ? 'past-weekend' : nil %>
   <br><br>
 <% end %>
 <br><br>

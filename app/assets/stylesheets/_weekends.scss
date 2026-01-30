@@ -21,3 +21,7 @@
   display: inline-flex;
   padding-inline: 5em;
 }
+
+tr.past-event, a.past-weekend {
+  opacity: 0.5;
+}

@@ -134,4 +134,57 @@ RSpec.describe Weekend, type: :model do
       expect(weekend.days.count).to eq(0)
     end
   end
+
+  describe '#past?' do
+    context 'when weekend has no events' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        expect(weekend.past?).to be false
+      end
+    end
+
+    context 'when last event has no start_datetime' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: nil)
+        expect(weekend.past?).to be false
+      end
+    end
+
+    context 'when last event is in the past' do
+      it 'returns true' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        expect(weekend.past?).to be true
+      end
+    end
+
+    context 'when last event is in the future' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        expect(weekend.past?).to be false
+      end
+    end
+
+    context 'with multiple events spanning days' do
+      it 'uses the last event to determine if past' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.tomorrow)
+        day_past = weekend.days.find_by(date: Date.yesterday)
+        day_future = weekend.days.find_by(date: Date.tomorrow)
+        session = create(:session)
+
+        create(:event, day: day_past, session: session, start_time: Time.parse('10:00'))
+        create(:event, day: day_future, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.past?).to be false
+      end
+    end
+  end
 end
