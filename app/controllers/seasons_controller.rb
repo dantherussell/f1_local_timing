@@ -7,10 +7,10 @@ class SeasonsController < ApplicationController
 
   def show
     @season = Season.find(params[:id])
-    @weekends = if @season.weekends.all? { |w| w.race_number.present? }
-                  @season.weekends.order(:race_number)
+    @weekends = if @season.weekends.where(race_number: nil).none?
+      @season.weekends.order(:race_number)
     else
-                  @season.weekends
+      @season.weekends
     end
   end
 

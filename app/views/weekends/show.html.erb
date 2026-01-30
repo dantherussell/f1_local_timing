@@ -2,7 +2,7 @@
 <h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
 <h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
 
-<% authed = session[:authed] || Rails.env.development? %>
+<% authed = authenticated? %>
 <div data-controller="time-toggle">
   <div class="time_buttons">
     <a href="javascript:void(0);" data-action="click->time-toggle#showLocal" data-time-toggle-target="localButton" class="<%= 'clicked ' unless authed %>time_button">
@@ -26,7 +26,7 @@
 </div>
 
 <br><br>
-<% if session[:authed] || Rails.env.development? %>
+<% if authed %>
   <%= link_to "Edit Weekend", edit_season_weekend_path(@season, @weekend) %> |
   <%= link_to "Delete Weekend", season_weekend_path(@season, @weekend), data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this weekend?", turbo_prefetch: false } %> |
   <%= link_to "'Print' View", print_season_weekend_path(@season, @weekend) %>

@@ -3,15 +3,14 @@ class EventsController < ApplicationController
   before_action :set_weekend
   before_action :set_day
   before_action :authenticate
+  before_action :load_series, only: %i[new edit create update]
 
   def new
     @event = @day.events.new
-    @series = Series.all
   end
 
   def edit
     @event = @day.events.find(params[:id])
-    @series = Series.all
   end
 
   def create
@@ -19,7 +18,6 @@ class EventsController < ApplicationController
     if @event.save
       redirect_to season_weekend_path(@season, @weekend), notice: "Event was successfully created."
     else
-      @series = Series.all
       render :new, status: :unprocessable_entity
     end
   end
@@ -29,7 +27,6 @@ class EventsController < ApplicationController
     if @event.update(event_params)
       redirect_to season_weekend_path(@season, @weekend), notice: "Event was successfully updated."
     else
-      @series = Series.all
       render :edit, status: :unprocessable_entity
     end
   end
@@ -52,6 +49,10 @@ class EventsController < ApplicationController
 
   def set_day
     @day = @weekend.days.find(params[:day_id])
+  end
+
+  def load_series
+    @series = Series.all
   end
 
   def event_params
