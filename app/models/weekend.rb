@@ -47,6 +47,13 @@ class Weekend < ApplicationRecord
           .find { |e| e.start_datetime && e.start_datetime.to_time > Time.current }
   end
 
+  def sprint?
+    # Intentional magic string - Sprint Qualifying only exists in sprint weekends
+    events.includes(session: :series).any? do |event|
+      event.session&.name&.downcase&.include?("sprint qualifying")
+    end
+  end
+
   private
 
   def first_day_before_last_day

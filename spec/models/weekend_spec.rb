@@ -244,4 +244,62 @@ RSpec.describe Weekend, type: :model do
       end
     end
   end
+
+  describe '#sprint?' do
+    context 'when weekend has no events' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        expect(weekend.sprint?).to be false
+      end
+    end
+
+    context 'when weekend has no Sprint Qualifying session' do
+      it 'returns false' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session, name: "Race")
+        create(:event, day: day, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.sprint?).to be false
+      end
+    end
+
+    context 'when weekend has a Sprint Qualifying session' do
+      it 'returns true' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        sprint_quali = create(:session, name: "Sprint Qualifying")
+        create(:event, day: day, session: sprint_quali, start_time: Time.parse('10:00'))
+
+        expect(weekend.sprint?).to be true
+      end
+    end
+
+    context 'when session name has different casing' do
+      it 'returns true regardless of case' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        sprint_quali = create(:session, name: "SPRINT QUALIFYING")
+        create(:event, day: day, session: sprint_quali, start_time: Time.parse('10:00'))
+
+        expect(weekend.sprint?).to be true
+      end
+    end
+
+    context 'when weekend has multiple events including Sprint Qualifying' do
+      it 'returns true' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        practice = create(:session, name: "Practice 1")
+        sprint_quali = create(:session, name: "Sprint Qualifying")
+        race = create(:session, name: "Race")
+
+        create(:event, day: day, session: practice, start_time: Time.parse('08:00'))
+        create(:event, day: day, session: sprint_quali, start_time: Time.parse('10:00'))
+        create(:event, day: day, session: race, start_time: Time.parse('14:00'))
+
+        expect(weekend.sprint?).to be true
+      end
+    end
+  end
 end
