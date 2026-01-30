@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe 'Weekends', type: :request do
+  include ActiveSupport::Testing::TimeHelpers
+
   let(:season) { create(:season) }
 
   around do |example|
@@ -42,14 +44,16 @@ RSpec.describe 'Weekends', type: :request do
       let(:session) { create(:session) }
 
       it 'shows countdown when next event is within 24 hours' do
-        weekend = create(:weekend, season: season, first_day: Date.current, last_day: Date.current)
-        day = weekend.days.first
-        future_time = (Time.current + 2.hours).strftime('%H:%M')
-        create(:event, day: day, session: session, start_time: Time.parse(future_time))
+        travel_to Time.zone.local(2025, 6, 15, 12, 0, 0) do
+          weekend = create(:weekend, season: season, first_day: Date.current, last_day: Date.current)
+          day = weekend.days.first
+          future_time = (Time.current + 2.hours).strftime('%H:%M')
+          create(:event, day: day, session: session, start_time: Time.parse(future_time))
 
-        get season_weekend_path(season, weekend)
-        expect(response.body).to include('countdown')
-        expect(response.body).to include('simply-countdown')
+          get season_weekend_path(season, weekend)
+          expect(response.body).to include('countdown')
+          expect(response.body).to include('simply-countdown')
+        end
       end
 
       it 'does not show countdown when next event is more than 24 hours away' do

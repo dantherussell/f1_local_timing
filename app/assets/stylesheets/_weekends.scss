@@ -29,8 +29,15 @@ body.dark .clicked {
   padding-inline: 5em;
 }
 
-tr.past-event, a.past-weekend {
-  opacity: 0.5;
+// Muted colours for past events (WCAG AA compliant - 4.5:1 contrast ratio)
+body.light tr.past-event,
+body.light a.past-weekend {
+  color: #727272;
+}
+
+body.dark tr.past-event,
+body.dark a.past-weekend {
+  color: #949494;
 }
 
 tr.next-event td:first-child::before {

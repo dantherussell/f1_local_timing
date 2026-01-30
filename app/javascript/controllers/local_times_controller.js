@@ -67,7 +67,13 @@ export default class extends Controller {
   applyTimeBasedStyling() {
     const now = new Date()
     const events = Array.from(this.element.querySelectorAll('tr[data-utc-time]'))
-      .sort((a, b) => new Date(a.dataset.utcTime) - new Date(b.dataset.utcTime))
+
+    // Clear any stale styling before recalculating
+    events.forEach(row => {
+      row.classList.remove('past-event', 'next-event')
+    })
+
+    events.sort((a, b) => new Date(a.dataset.utcTime) - new Date(b.dataset.utcTime))
 
     let nextFound = false
     events.forEach(row => {

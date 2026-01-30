@@ -49,7 +49,7 @@ class Weekend < ApplicationRecord
 
   def sprint?
     # Intentional magic string - Sprint Qualifying only exists in sprint weekends
-    events.includes(session: :series).any? do |event|
+    events.includes(:session).any? do |event|
       event.session&.name&.downcase&.include?("sprint qualifying")
     end
   end

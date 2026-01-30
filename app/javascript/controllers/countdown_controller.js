@@ -6,7 +6,14 @@ export default class extends Controller {
   static values = { targetTime: String, sessionName: String }
 
   connect() {
+    // Clear any existing countdown elements (e.g., from Turbo cache restoration)
+    this.timerTarget.innerHTML = ''
+
     const targetDate = new Date(this.targetTimeValue)
+    if (isNaN(targetDate.getTime())) {
+      console.warn('Countdown: Invalid target time value')
+      return
+    }
 
     simplyCountdown(this.timerTarget, {
       year: targetDate.getFullYear(),
@@ -18,7 +25,8 @@ export default class extends Controller {
       removeZeroUnits: true,
       zeroPad: true,
       onEnd: () => {
-        this.element.querySelector('.countdown-label').textContent = `${this.sessionNameValue} is live!`
+        const label = this.element.querySelector('.countdown-label')
+        if (label) label.textContent = `${this.sessionNameValue} is live!`
         this.timerTarget.style.display = 'none'
       }
     })
