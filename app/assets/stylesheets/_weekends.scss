@@ -41,9 +41,7 @@ body.dark a.past-weekend {
 }
 
 tr.next-event td:first-child::before {
-  content: "⏭ ";
-  position: relative;
-  top: -0.05em;
+  content: "▶ ";
 }
 
 body.light tr.next-event td:first-child::before {
