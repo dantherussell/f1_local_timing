@@ -47,24 +47,28 @@ RSpec.describe ApplicationHelper, type: :helper do
     context "when dark theme" do
       before { helper.request.cookies[:theme] = "dark" }
 
-      it "returns link to light mode" do
-        expect(helper.theme_toggle_link).to include("Light Mode")
-        expect(helper.theme_toggle_link).to include("theme=light")
+      it "returns link to light mode with turbo prefetch disabled" do
+        link = helper.theme_toggle_link
+        expect(link).to include("Light Mode")
+        expect(link).to include("theme=light")
+        expect(link).to include('data-turbo-prefetch="false"')
       end
     end
 
     context "when light theme" do
       before { helper.request.cookies[:theme] = "light" }
 
-      it "returns link to dark mode" do
-        expect(helper.theme_toggle_link).to include("Dark Mode")
-        expect(helper.theme_toggle_link).to include("theme=dark")
+      it "returns link to dark mode with turbo prefetch disabled" do
+        link = helper.theme_toggle_link
+        expect(link).to include("Dark Mode")
+        expect(link).to include("theme=dark")
+        expect(link).to include('data-turbo-prefetch="false"')
       end
     end
   end
 
   describe "#print_view?" do
-    context "when path includes print" do
+    context "when path includes print segment" do
       before { allow(helper.request).to receive(:path).and_return("/seasons/1/weekends/1/print") }
 
       it "returns true" do
@@ -74,6 +78,14 @@ RSpec.describe ApplicationHelper, type: :helper do
 
     context "when path does not include print" do
       before { allow(helper.request).to receive(:path).and_return("/seasons/1/weekends/1") }
+
+      it "returns false" do
+        expect(helper.print_view?).to be false
+      end
+    end
+
+    context "when path contains print as substring" do
+      before { allow(helper.request).to receive(:path).and_return("/sprints/1") }
 
       it "returns false" do
         expect(helper.print_view?).to be false

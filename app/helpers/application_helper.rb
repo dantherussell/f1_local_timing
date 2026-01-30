@@ -17,6 +17,6 @@ module ApplicationHelper
   end
 
   def print_view?
-    request.path.include?("print")
+    request.path.split("/").include?("print")
   end
 end
