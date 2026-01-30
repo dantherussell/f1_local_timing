@@ -10,7 +10,14 @@
   pointer-events: none;
   text-decoration: none;
   font-weight: bolder;
-  color: red !important;
+}
+
+body.light .clicked {
+  color: #cc0000 !important;
+}
+
+body.dark .clicked {
+  color: #ff3333 !important;
 }
 
 .time_buttons {
@@ -28,7 +35,72 @@ tr.past-event, a.past-weekend {
 
 tr.next-event td:first-child::before {
   content: "⏭ ";
-  color: #00c800;
   position: relative;
   top: -0.05em;
+}
+
+body.light tr.next-event td:first-child::before {
+  color: #008800;
+}
+
+body.dark tr.next-event td:first-child::before {
+  color: #00c800;
+}
+
+.countdown-container {
+  margin: 1em 0;
+}
+
+.countdown-label {
+  font-family: 'f1-wide', sans-serif;
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+body.light .countdown-label {
+  color: #008800;
+}
+
+body.dark .countdown-label {
+  color: #00c800;
+}
+
+.simply-countdown {
+  display: flex;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+.simply-countdown > .simply-section {
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  min-width: 4em;
+}
+
+body.light .simply-countdown > .simply-section {
+  background-color: rgba(0, 200, 0, 0.1);
+}
+
+body.dark .simply-countdown > .simply-section {
+  background-color: rgba(0, 200, 0, 0.2);
+}
+
+.simply-countdown .simply-amount {
+  font-family: 'f1-bold', sans-serif;
+  font-size: 1.5em;
+  display: block;
+}
+
+body.light .simply-countdown .simply-amount {
+  color: #008800;
+}
+
+body.dark .simply-countdown .simply-amount {
+  color: #00c800;
+}
+
+.simply-countdown .simply-word {
+  font-family: 'f1-regular', sans-serif;
+  font-size: 0.8em;
+  display: block;
 }

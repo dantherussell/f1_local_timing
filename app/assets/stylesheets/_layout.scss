@@ -65,7 +65,14 @@ table {
 
 .f1 {
   font-weight: 900;
-  color: red;
+}
+
+body.light .f1 {
+  color: #cc0000;
+}
+
+body.dark .f1 {
+  color: #ff3333;
 }
 
 .notice {

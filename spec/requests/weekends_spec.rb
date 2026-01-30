@@ -37,6 +37,46 @@ RSpec.describe 'Weekends', type: :request do
       get season_weekend_path(season, weekend)
       expect(response).to have_http_status(:success)
     end
+
+    context 'countdown timer' do
+      let(:session) { create(:session) }
+
+      it 'shows countdown when next event is within 24 hours' do
+        weekend = create(:weekend, season: season, first_day: Date.current, last_day: Date.current)
+        day = weekend.days.first
+        future_time = (Time.current + 2.hours).strftime('%H:%M')
+        create(:event, day: day, session: session, start_time: Time.parse(future_time))
+
+        get season_weekend_path(season, weekend)
+        expect(response.body).to include('countdown')
+        expect(response.body).to include('simply-countdown')
+      end
+
+      it 'does not show countdown when next event is more than 24 hours away' do
+        weekend = create(:weekend, season: season, first_day: Date.tomorrow + 1, last_day: Date.tomorrow + 1)
+        day = weekend.days.first
+        create(:event, day: day, session: session, start_time: Time.parse('14:00'))
+
+        get season_weekend_path(season, weekend)
+        expect(response.body).not_to include('simply-countdown')
+      end
+
+      it 'does not show countdown when all events are in the past' do
+        weekend = create(:weekend, season: season, first_day: Date.yesterday, last_day: Date.yesterday)
+        day = weekend.days.first
+        create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+
+        get season_weekend_path(season, weekend)
+        expect(response.body).not_to include('simply-countdown')
+      end
+
+      it 'does not show countdown when weekend has no events' do
+        weekend = create(:weekend, season: season, first_day: Date.current, last_day: Date.current)
+
+        get season_weekend_path(season, weekend)
+        expect(response.body).not_to include('simply-countdown')
+      end
+    end
   end
 
   describe 'GET /seasons/:season_id/weekends/:id/print' do
