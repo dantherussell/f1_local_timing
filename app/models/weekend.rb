@@ -19,16 +19,13 @@ class Weekend < ApplicationRecord
   end
 
   def local_date_range
-    if events.any?
-      # Use actual event times converted to track timezone
-      sorted_events = events.includes(:day).sort_by { |e| e.start_datetime || DateTime.new }
-      first_event = sorted_events.first
-      last_event = sorted_events.last
+    if events.exists?
+      # Use database ordering instead of loading all events into memory
+      ordered_events = events.includes(:day).order("days.date, events.start_time")
+      first_event = ordered_events.first
+      last_event = ordered_events.last
 
-      first_date = first_event&.track_date
-      last_date = last_event&.track_date
-
-      [ first_date, last_date ]
+      [ first_event&.track_date, last_event&.track_date ]
     else
       # Fall back to UTC dates
       [ first_day, last_day ]
