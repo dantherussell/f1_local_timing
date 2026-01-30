@@ -104,3 +104,27 @@ body.dark .simply-countdown .simply-amount {
   font-size: 0.8em;
   display: block;
 }
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .time_button {
+    padding-inline: 0.5em;
+  }
+
+  .countdown-label {
+    font-size: 0.85em;
+  }
+
+  .simply-countdown > .simply-section {
+    min-width: 3em;
+    padding: 0.4em 0.6em;
+  }
+
+  .simply-countdown .simply-amount {
+    font-size: 1.2em;
+  }
+
+  .simply-countdown .simply-word {
+    font-size: 0.7em;
+  }
+}

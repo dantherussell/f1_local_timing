@@ -79,3 +79,34 @@ body.dark .f1 {
   color: green;
   font-weight: bold;
 }
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.5em;
+  }
+
+  h2 {
+    font-size: 1.1em;
+  }
+
+  h3 {
+    font-size: 1em;
+  }
+
+  h4 {
+    font-size: 0.9em;
+  }
+
+  table {
+    width: 95%;
+  }
+
+  input[type="text"], input[type="date"], input[type="time"], select {
+    width: 90%;
+  }
+
+  .ts-wrapper {
+    width: 90%;
+  }
+}
