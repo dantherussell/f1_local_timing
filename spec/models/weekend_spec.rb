@@ -187,4 +187,61 @@ RSpec.describe Weekend, type: :model do
       end
     end
   end
+
+  describe '#next_event' do
+    context 'when weekend has no events' do
+      it 'returns nil' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        expect(weekend.next_event).to be_nil
+      end
+    end
+
+    context 'when all events are in the past' do
+      it 'returns nil' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.yesterday)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        expect(weekend.next_event).to be_nil
+      end
+    end
+
+    context 'when all events are in the future' do
+      it 'returns the first event' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session)
+        event1 = create(:event, day: day, session: session, start_time: Time.parse('10:00'))
+        create(:event, day: day, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.next_event).to eq(event1)
+      end
+    end
+
+    context 'with mix of past and future events' do
+      it 'returns the first future event' do
+        weekend = create(:weekend, first_day: Date.yesterday, last_day: Date.tomorrow)
+        day_past = weekend.days.find_by(date: Date.yesterday)
+        day_future = weekend.days.find_by(date: Date.tomorrow)
+        session = create(:session)
+
+        create(:event, day: day_past, session: session, start_time: Time.parse('10:00'))
+        future_event = create(:event, day: day_future, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.next_event).to eq(future_event)
+      end
+    end
+
+    context 'when event has no start_datetime' do
+      it 'skips events without start_datetime' do
+        weekend = create(:weekend, first_day: Date.tomorrow, last_day: Date.tomorrow)
+        day = weekend.days.first
+        session = create(:session)
+        create(:event, day: day, session: session, start_time: nil)
+        event_with_time = create(:event, day: day, session: session, start_time: Time.parse('14:00'))
+
+        expect(weekend.next_event).to eq(event_with_time)
+      end
+    end
+  end
 end

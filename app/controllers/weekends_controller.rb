@@ -5,6 +5,7 @@ class WeekendsController < ApplicationController
   def show
     @weekend = @season.weekends.find(params[:id])
     @days = @weekend.days.includes(:events).order(:date)
+    @next_event = @weekend.next_event
   end
 
   def print

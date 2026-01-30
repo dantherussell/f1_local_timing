@@ -41,6 +41,12 @@ class Weekend < ApplicationRecord
     last_event.start_datetime.to_time < Time.current
   end
 
+  def next_event
+    events.includes(:day, :session)
+          .order("days.date, events.start_time")
+          .find { |e| e.start_datetime && e.start_datetime.to_time > Time.current }
+  end
+
   private
 
   def first_day_before_last_day

@@ -2,7 +2,7 @@
   <table>
     <tbody>
       <% @weekend.events.includes(:day, :session).order("days.date, events.start_time").each do |event| %>
-        <tr data-local-times-target="event" data-utc-time="<%= event.start_datetime&.iso8601 %>" class="<%= 'f1 ' if event.series_name == 'Formula 1' %><%= 'past-event' if event.past? %>">
+        <tr data-local-times-target="event" data-utc-time="<%= event.start_datetime&.iso8601 %>" class="<%= event_row_classes(event, @next_event) %>">
           <td><%= event.series_name %></td>
           <td><%= event.session_name %></td>
           <td><%= local_time(event.start_datetime, "%H:%M") %></td>

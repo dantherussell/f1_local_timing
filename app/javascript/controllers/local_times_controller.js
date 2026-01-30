@@ -66,9 +66,17 @@ export default class extends Controller {
 
   applyTimeBasedStyling() {
     const now = new Date()
-    this.element.querySelectorAll('tr[data-utc-time]').forEach(row => {
-      if (new Date(row.dataset.utcTime) < now) {
+    const events = Array.from(this.element.querySelectorAll('tr[data-utc-time]'))
+      .sort((a, b) => new Date(a.dataset.utcTime) - new Date(b.dataset.utcTime))
+
+    let nextFound = false
+    events.forEach(row => {
+      const eventTime = new Date(row.dataset.utcTime)
+      if (eventTime < now) {
         row.classList.add('past-event')
+      } else if (!nextFound) {
+        row.classList.add('next-event')
+        nextFound = true
       }
     })
   }

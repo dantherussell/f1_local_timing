@@ -25,3 +25,10 @@
 tr.past-event, a.past-weekend {
   opacity: 0.5;
 }
+
+tr.next-event td:first-child::before {
+  content: "⏭ ";
+  color: #00c800;
+  position: relative;
+  top: -0.05em;
+}
