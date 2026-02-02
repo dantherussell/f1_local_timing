@@ -1,16 +1,15 @@
 class WeekendsController < ApplicationController
   before_action :set_season
-  before_action :authenticate, only: %i[destroy edit new create update]
+  before_action :set_weekend, only: %i[show print edit update destroy import]
+  before_action :authenticate, only: %i[destroy edit new create update import]
 
   def show
-    @weekend = @season.weekends.find(params[:id])
     @days = @weekend.days.includes(:events).order(:date)
     @next_event = @weekend.next_event
     @show_countdown = show_countdown?
   end
 
   def print
-    @weekend = @season.weekends.find(params[:id])
     @days = @weekend.days.includes(:events).order(:date)
     render layout: "print"
   end
@@ -20,7 +19,6 @@ class WeekendsController < ApplicationController
   end
 
   def edit
-    @weekend = @season.weekends.find(params[:id])
   end
 
   def create
@@ -33,7 +31,6 @@ class WeekendsController < ApplicationController
   end
 
   def update
-    @weekend = @season.weekends.find(params[:id])
     if @weekend.update(weekend_params)
       redirect_to season_weekend_path(@season, @weekend), notice: "Weekend was successfully updated."
     else
@@ -42,15 +39,42 @@ class WeekendsController < ApplicationController
   end
 
   def destroy
-    @weekend = @season.weekends.find(params[:id])
     @weekend.destroy
     redirect_to season_path(@season), notice: "Weekend was successfully deleted."
+  end
+
+  def import
+    return unless request.post?
+
+    url = params[:url]
+    if url.blank?
+      flash.now[:alert] = "Please provide a URL"
+      return
+    end
+
+    fetcher_result = F1ScheduleFetcher.new(url).call
+    unless fetcher_result.success?
+      flash.now[:alert] = fetcher_result.errors.join(", ")
+      return
+    end
+
+    importer_result = F1ScheduleImporter.new(@weekend, fetcher_result.data).call
+    if importer_result.success?
+      redirect_to season_weekend_path(@season, @weekend),
+                  notice: "Successfully imported #{importer_result.data[:events_created]} events."
+    else
+      flash.now[:alert] = importer_result.errors.join(", ")
+    end
   end
 
   private
 
   def set_season
     @season = Season.find(params[:season_id])
+  end
+
+  def set_weekend
+    @weekend = @season.weekends.find(params[:id])
   end
 
   def weekend_params

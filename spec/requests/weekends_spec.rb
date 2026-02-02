@@ -211,4 +211,87 @@ RSpec.describe 'Weekends', type: :request do
       end
     end
   end
+
+  describe 'GET /seasons/:season_id/weekends/:id/import' do
+    let(:weekend) { create(:weekend, season: season) }
+
+    it 'requires authentication' do
+      get import_season_weekend_path(season, weekend)
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'returns a successful response when authenticated' do
+      get import_season_weekend_path(season, weekend), headers: auth_headers
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'displays the import form' do
+      get import_season_weekend_path(season, weekend), headers: auth_headers
+      expect(response.body).to include('Import Schedule')
+      expect(response.body).to include('Formula 1 Schedule URL')
+    end
+  end
+
+  describe 'POST /seasons/:season_id/weekends/:id/import' do
+    let(:weekend) { create(:weekend, season: season, first_day: Date.new(2025, 12, 5), last_day: Date.new(2025, 12, 7)) }
+    let(:fixture_html) { File.read(Rails.root.join('spec/fixtures/f1_schedule_page.html')) }
+    let(:f1_url) { 'https://www.formula1.com/en/latest/article/test-grand-prix-2025.abc123' }
+
+    before do
+      stub_request(:get, f1_url).to_return(status: 200, body: fixture_html)
+    end
+
+    it 'requires authentication' do
+      post import_season_weekend_path(season, weekend), params: { url: f1_url }
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    context 'when authenticated' do
+      it 'imports events from the URL' do
+        expect {
+          post import_season_weekend_path(season, weekend), params: { url: f1_url }, headers: auth_headers
+        }.to change(Event, :count)
+      end
+
+      it 'redirects to weekend page on success' do
+        post import_season_weekend_path(season, weekend), params: { url: f1_url }, headers: auth_headers
+        expect(response).to redirect_to(season_weekend_path(season, weekend))
+      end
+
+      it 'shows success notice' do
+        post import_season_weekend_path(season, weekend), params: { url: f1_url }, headers: auth_headers
+        expect(flash[:notice]).to include('Successfully imported')
+      end
+
+      context 'when URL is blank' do
+        it 'shows an error' do
+          post import_season_weekend_path(season, weekend), params: { url: '' }, headers: auth_headers
+          expect(response.body).to include('Please provide a URL')
+        end
+      end
+
+      context 'when fetch fails' do
+        before do
+          stub_request(:get, f1_url).to_return(status: 404)
+        end
+
+        it 'shows an error' do
+          post import_season_weekend_path(season, weekend), params: { url: f1_url }, headers: auth_headers
+          expect(response.body).to include('Failed to fetch page')
+        end
+      end
+
+      context 'when import fails' do
+        before do
+          allow_any_instance_of(F1ScheduleImporter).to receive(:call)
+            .and_return(Result.failure("Database error"))
+        end
+
+        it 'shows the importer error' do
+          post import_season_weekend_path(season, weekend), params: { url: f1_url }, headers: auth_headers
+          expect(response.body).to include('Database error')
+        end
+      end
+    end
+  end
 end
