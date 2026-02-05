@@ -52,6 +52,11 @@ class WeekendsController < ApplicationController
       return
     end
 
+    unless allowed_import_url?(url)
+      flash.now[:alert] = "Only formula1.com URLs are supported"
+      return
+    end
+
     fetcher_result = F1ScheduleFetcher.new(url).call
     unless fetcher_result.success?
       flash.now[:alert] = fetcher_result.errors.join(", ")
@@ -86,5 +91,12 @@ class WeekendsController < ApplicationController
 
     hours_until = (@next_event.start_datetime.to_time - Time.current) / 1.hour
     hours_until <= 24 && hours_until > 0
+  end
+
+  def allowed_import_url?(url)
+    uri = URI.parse(url)
+    uri.is_a?(URI::HTTPS) && uri.host&.match?(/\A(\w+\.)?formula1\.com\z/)
+  rescue URI::InvalidURIError
+    false
   end
 end

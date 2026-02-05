@@ -102,6 +102,58 @@ RSpec.describe F1ScheduleImporter do
       # 17:00 local at +04:00 = 13:00 UTC
       expect(race_event.start_time.strftime("%H:%M")).to eq("13:00")
     end
+
+    context "when UTC date differs from local date" do
+      # Melbourne GP scenario: +11:00 timezone, early morning local event
+      # Local: March 15, 01:00 at +11:00 = UTC: March 14, 14:00
+      # The app stores events by UTC date, then re-groups by track_date at display time
+      let(:weekend) do
+        create(:weekend,
+               season: season,
+               first_day: Date.new(2026, 3, 14),
+               last_day: Date.new(2026, 3, 16),
+               local_time_offset: "+00:00")
+      end
+
+      let(:schedule_data) do
+        {
+          timezone_offset: "+11:00",
+          events: [
+            { date: Date.new(2026, 3, 15), local_time: "01:00", series: "Formula 1", session: "Early Session" }
+          ]
+        }
+      end
+
+      it "assigns event to the UTC date day (re-grouped by track_date at display time)" do
+        result
+
+        march_14 = weekend.days.find_by(date: Date.new(2026, 3, 14))
+
+        # Event is stored on March 14 (UTC date), display layer re-groups by track_date
+        expect(march_14.events.count).to eq(1)
+        expect(march_14.events.first.name).to eq("Early Session")
+      end
+
+      it "stores the correct UTC time" do
+        result
+
+        march_14 = weekend.days.find_by(date: Date.new(2026, 3, 14))
+        event = march_14.events.first
+
+        # 01:00 local at +11:00 = 14:00 UTC
+        expect(event.start_time.strftime("%H:%M")).to eq("14:00")
+      end
+
+      it "calculates track_date correctly for display grouping" do
+        result
+
+        march_14 = weekend.days.find_by(date: Date.new(2026, 3, 14))
+        event = march_14.events.first
+
+        # UTC March 14 14:00 + 11 hours = March 15 01:00 local (track_date = March 15)
+        expect(event.track_date).to eq(Date.new(2026, 3, 15))
+      end
+    end
   end
 
   describe "event attributes" do

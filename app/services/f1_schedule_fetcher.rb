@@ -31,15 +31,19 @@ class F1ScheduleFetcher
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = (uri.scheme == "https")
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE # F1.com has CRL verification issues
+    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    http.open_timeout = 5
+    http.read_timeout = 10
 
     request = Net::HTTP::Get.new(uri.request_uri)
     request["User-Agent"] = "Mozilla/5.0 (compatible; F1LocalTiming/1.0)"
 
     response = http.request(request)
 
-    # Handle redirects
+    # Handle redirects (only to formula1.com)
     if response.is_a?(Net::HTTPRedirection)
+      redirect_uri = URI.parse(response["location"])
+      return nil unless redirect_uri.host&.match?(/\A(\w+\.)?formula1\.com\z/)
       return fetch_html_from_url(response["location"])
     end
 
@@ -55,7 +59,9 @@ class F1ScheduleFetcher
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = (uri.scheme == "https")
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    http.open_timeout = 5
+    http.read_timeout = 10
 
     request = Net::HTTP::Get.new(uri.request_uri)
     request["User-Agent"] = "Mozilla/5.0 (compatible; F1LocalTiming/1.0)"
