@@ -1,0 +1,27 @@
+<h1>Import Schedule</h1>
+<h2><%= @weekend.gp_title %></h2>
+
+<% if flash[:alert] %>
+  <div class="alert alert-danger">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
+
+<p><strong>Warning:</strong> Importing will delete all existing events for this weekend and replace them with the imported schedule.</p>
+
+<%= form_with url: import_season_weekend_path(@season, @weekend), method: :post, local: true do |f| %>
+  <div class="form-group">
+    <%= f.label :url, "Formula 1 Schedule URL" %>
+    <div>
+      <%= f.text_field :url, class: 'form-control', placeholder: 'https://www.formula1.com/en/latest/article/...', size: 80 %>
+    </div>
+    <small>Paste the URL of the F1 timetable article (e.g., "FORMULA 1 ... GRAND PRIX 2025 - full timetable")</small>
+  </div>
+  <br>
+  <div class="form-group">
+    <%= f.submit "Import Schedule", data: { turbo_confirm: "This will delete all existing events for this weekend. Continue?" } %>
+  </div>
+<% end %>
+
+<br>
+<%= link_to 'Back', season_weekend_path(@season, @weekend) %>
