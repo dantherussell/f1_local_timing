@@ -9,6 +9,7 @@ A Rails application for viewing Formula 1 race weekend schedules in your local t
 - Light and dark theme toggle
 - Print-friendly view for race weekends
 - Admin interface for managing seasons, weekends, and events
+- Import schedules directly from F1.com timetable articles
 
 ## Tech Stack
 
