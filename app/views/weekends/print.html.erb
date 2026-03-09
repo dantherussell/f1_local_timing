@@ -1,4 +1,4 @@
-<h1><%= @weekend.gp_title %></h1>
+<h1><%= @weekend.gp_title %><% if @weekend.sprint? %> <span class="sprint-badge">SPRINT</span><% end %></h1>
 <h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
 <h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
 
