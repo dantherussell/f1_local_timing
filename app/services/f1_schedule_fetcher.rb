@@ -75,10 +75,10 @@ class F1ScheduleFetcher
   end
 
   def extract_timezone_offset(html)
-    if html =~ /(\d+)\s*hours?\s*ahead\s*of\s*UTC/i
+    if html =~ /(\d{1,2})\s*hours?\s*ahead\s*of\s*UTC/i
       hours = ::Regexp.last_match(1).to_i
       format_offset(hours)
-    elsif html =~ /(\d+)\s*hours?\s*behind\s*UTC/i
+    elsif html =~ /(\d{1,2})\s*hours?\s*behind\s*UTC/i
       hours = ::Regexp.last_match(1).to_i
       format_offset(-hours)
     else
