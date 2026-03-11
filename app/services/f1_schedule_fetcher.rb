@@ -77,13 +77,13 @@ class F1ScheduleFetcher
   def extract_timezone_offset(html)
     if html =~ /(\d{1,2})\s*hours?\s*ahead\s*of\s*UTC/i
       hours = ::Regexp.last_match(1).to_i
-      format_offset(hours)
+      return format_offset(hours) if hours <= 14
     elsif html =~ /(\d{1,2})\s*hours?\s*behind\s*UTC/i
       hours = ::Regexp.last_match(1).to_i
-      format_offset(-hours)
-    else
-      "+00:00"
+      return format_offset(-hours) if hours <= 12
     end
+
+    "+00:00"
   end
 
   def format_offset(hours)
