@@ -121,6 +121,42 @@ RSpec.describe F1Schedule::EventParser do
       end
     end
 
+    context "with sole ordinal-prefixed sessions" do
+      let(:f2_sole_practice_html) do
+        <<~HTML
+          <html><body>
+            <h1>2026 Test Grand Prix</h1>
+            <h2>FRIDAY 1 MAY</h2>
+            <div>FIA Formula 2FIRST PRACTICE SESSION09:30 - 10:15</div>
+          </body></html>
+        HTML
+      end
+
+      let(:f2_two_practices_html) do
+        <<~HTML
+          <html><body>
+            <h1>2026 Test Grand Prix</h1>
+            <h2>FRIDAY 1 MAY</h2>
+            <div>FIA Formula 2FIRST PRACTICE SESSION09:30 - 10:15</div>
+            <h2>SATURDAY 2 MAY</h2>
+            <div>FIA Formula 2SECOND PRACTICE SESSION09:30 - 10:15</div>
+          </body></html>
+        HTML
+      end
+
+      it "strips the ordinal prefix when only one practice exists for the series" do
+        events = parser.extract_events(f2_sole_practice_html)
+        f2_session = events.find { |e| e[:series] == "FIA Formula 2" }[:session]
+        expect(f2_session).to eq("Practice")
+      end
+
+      it "preserves both ordinals when First and Second practice both exist" do
+        events = parser.extract_events(f2_two_practices_html)
+        f2_sessions = events.select { |e| e[:series] == "FIA Formula 2" }.map { |e| e[:session] }
+        expect(f2_sessions).to contain_exactly("First Practice", "Second Practice")
+      end
+    end
+
     context "with year detection" do
       let(:html_2026) do
         <<~HTML

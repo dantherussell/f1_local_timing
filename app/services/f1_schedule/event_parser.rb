@@ -26,6 +26,7 @@ module F1Schedule
         parse_day_content(section[:content], date, events)
       end
 
+      events = @normalizer.normalize_ordinal_prefixes(events)
       deduplicate(events)
     end
 

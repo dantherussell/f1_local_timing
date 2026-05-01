@@ -3,6 +3,8 @@
 module F1Schedule
   # Normalizes series and session names for consistency
   class EventNormalizer
+    ORDINAL_PREFIX = /\A(First|Second|Third|Fourth|Fifth)\s+(.+)\z/i
+
     # F1-specific session name mappings
     F1_SESSION_NORMALIZATIONS = {
       /First\s*Practice|Practice\s*1|FP\s*1/i => "Free Practice 1",
@@ -19,6 +21,24 @@ module F1Schedule
 
       # Normalize "FORMULA" to "Formula" (keep the number as-is)
       name.strip.gsub(/FORMULA/i, "Formula")
+    end
+
+    def normalize_ordinal_prefixes(events)
+      events.group_by { |e| e[:series] }.each_value do |group|
+        parsed = group.map { |e| [ e, e[:session].match(ORDINAL_PREFIX) ] }
+        parsed.each do |event, match|
+          next unless match
+
+          ordinal, suffix = match[1], match[2]
+          sibling = parsed.any? do |other_event, other_match|
+            next false if other_event.equal?(event)
+            next false unless other_match
+            other_match[2].casecmp?(suffix) && !other_match[1].casecmp?(ordinal)
+          end
+          event[:session] = suffix unless sibling
+        end
+      end
+      events
     end
 
     def normalize_session(name, series)
