@@ -166,4 +166,71 @@ RSpec.describe F1Schedule::EventNormalizer do
       end
     end
   end
+
+  describe "#normalize_ordinal_prefixes" do
+    let(:f2) { "FIA Formula 2" }
+
+    def events(*sessions, series: f2)
+      sessions.map { |s| { series: series, session: s, date: Date.new(2026, 5, 1), local_time: "09:00" } }
+    end
+
+    context "when only one event exists with a leading ordinal" do
+      it "strips the ordinal prefix" do
+        result = normalizer.normalize_ordinal_prefixes(events("First Practice"))
+        expect(result.first[:session]).to eq("Practice")
+      end
+    end
+
+    context "when two events share the same suffix under different ordinals" do
+      it "preserves both ordinal prefixes" do
+        result = normalizer.normalize_ordinal_prefixes(events("First Practice", "Second Practice"))
+        expect(result.map { |e| e[:session] }).to eq([ "First Practice", "Second Practice" ])
+      end
+    end
+
+    context "when a non-First ordinal is the sole event with that suffix" do
+      it "strips the ordinal prefix from Second Race" do
+        result = normalizer.normalize_ordinal_prefixes(events("Second Race"))
+        expect(result.first[:session]).to eq("Race")
+      end
+    end
+
+    context "when duplicate events have the same ordinal and suffix" do
+      it "renames both (same ordinal is not a sibling)" do
+        result = normalizer.normalize_ordinal_prefixes(events("First Practice", "First Practice"))
+        expect(result.map { |e| e[:session] }).to eq([ "Practice", "Practice" ])
+      end
+    end
+
+    context "when events span multiple series" do
+      it "evaluates sibling relationships per series independently" do
+        list = [
+          { series: "FIA Formula 2", session: "First Practice", date: Date.new(2026, 5, 1), local_time: "09:00" },
+          { series: "FIA Formula 3", session: "First Practice", date: Date.new(2026, 5, 1), local_time: "10:00" },
+          { series: "FIA Formula 3", session: "Second Practice", date: Date.new(2026, 5, 1), local_time: "14:00" }
+        ]
+        result = normalizer.normalize_ordinal_prefixes(list)
+        sessions_by_series = result.group_by { |e| e[:series] }.transform_values { |es| es.map { |e| e[:session] } }
+        expect(sessions_by_series["FIA Formula 2"]).to eq([ "Practice" ])
+        expect(sessions_by_series["FIA Formula 3"]).to eq([ "First Practice", "Second Practice" ])
+      end
+    end
+
+    context "when F1 events are already normalized (no leading ordinal word)" do
+      it "leaves Free Practice 1 and Free Practice 2 unchanged" do
+        list = [
+          { series: "Formula 1", session: "Free Practice 1", date: Date.new(2026, 5, 2), local_time: "12:00" },
+          { series: "Formula 1", session: "Free Practice 2", date: Date.new(2026, 5, 3), local_time: "16:00" }
+        ]
+        result = normalizer.normalize_ordinal_prefixes(list)
+        expect(result.map { |e| e[:session] }).to eq([ "Free Practice 1", "Free Practice 2" ])
+      end
+
+      it "leaves a single Free Practice 1 unchanged (Sprint weekend)" do
+        list = [ { series: "Formula 1", session: "Free Practice 1", date: Date.new(2026, 5, 2), local_time: "12:00" } ]
+        result = normalizer.normalize_ordinal_prefixes(list)
+        expect(result.first[:session]).to eq("Free Practice 1")
+      end
+    end
+  end
 end

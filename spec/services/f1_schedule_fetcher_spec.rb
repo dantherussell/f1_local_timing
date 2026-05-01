@@ -102,7 +102,7 @@ RSpec.describe F1ScheduleFetcher do
     it "correctly parses series with 'Sprint' in the name" do
       porsche_events = result.data[:events].select { |e| e[:series] =~ /Porsche Sprint Challenge/i }
       expect(porsche_events).not_to be_empty
-      expect(porsche_events.first[:session]).to eq("First Race")
+      expect(porsche_events.first[:session]).to eq("Race")
     end
 
     it "captures F1's standalone Sprint session" do
