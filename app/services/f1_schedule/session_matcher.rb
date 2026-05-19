@@ -29,6 +29,8 @@ module F1Schedule
 
     RACE_PATTERNS = [
       /FEATURE RACE/i,
+      /OPENING RACE/i,
+      /REVERSE GRID RACE/i,
       /FIRST RACE/i,
       /SECOND RACE/i,
       /THIRD RACE/i,

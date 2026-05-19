@@ -15,7 +15,7 @@ module F1Schedule
 
     def extract_events(html)
       doc = Nokogiri::HTML(html)
-      text_content = doc.text
+      text_content = doc.xpath("//text()").map { |t| t.text.strip }.reject(&:empty?).join(" ")
       year = extract_year(text_content)
 
       events = []

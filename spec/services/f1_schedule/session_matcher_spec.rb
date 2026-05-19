@@ -63,6 +63,18 @@ RSpec.describe F1Schedule::SessionMatcher do
         expect(matcher.split("FIA Formula 2FEATURE RACE")).to eq([ "FIA Formula 2", "FEATURE RACE" ])
       end
 
+      it "splits OPENING RACE" do
+        expect(matcher.split("F1 AcademyOpening Race")).to eq([ "F1 Academy", "Opening Race" ])
+      end
+
+      it "splits OPENING RACE with space between series and session" do
+        expect(matcher.split("F1 Academy Opening Race")).to eq([ "F1 Academy", "Opening Race" ])
+      end
+
+      it "splits REVERSE GRID RACE" do
+        expect(matcher.split("F1 AcademyReverse Grid Race")).to eq([ "F1 Academy", "Reverse Grid Race" ])
+      end
+
       it "splits FIRST RACE" do
         expect(matcher.split("Porsche CupFIRST RACE")).to eq([ "Porsche Cup", "FIRST RACE" ])
       end
