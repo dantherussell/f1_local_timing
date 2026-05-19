@@ -157,6 +157,37 @@ RSpec.describe F1Schedule::EventParser do
       end
     end
 
+    context "with F1 Academy opening/reverse grid races" do
+      let(:f1_academy_html) do
+        <<~HTML
+          <html><body>
+            <h1>2026 Test Grand Prix</h1>
+            <h2>SATURDAY 23 MAY</h2>
+            <div><span>F1 Academy</span><span>Opening Race (17 Laps, Max 30 Mins +1 Lap)</span><span>09:45 - 10:20</span></div>
+            <div><span>F1 Academy</span><span>Reverse Grid Race (17 Laps, Max 30 Mins +1 Lap)</span><span>18:05 - 18:35</span></div>
+          </body></html>
+        HTML
+      end
+
+      it "correctly splits series and session when elements have no whitespace between them" do
+        events = parser.extract_events(f1_academy_html)
+        series = events.map { |e| e[:series] }
+        expect(series).to all(eq("F1 Academy"))
+      end
+
+      it "parses Opening Race as the session" do
+        events = parser.extract_events(f1_academy_html)
+        sessions = events.map { |e| e[:session] }
+        expect(sessions).to include("Opening Race")
+      end
+
+      it "parses Reverse Grid Race as the session" do
+        events = parser.extract_events(f1_academy_html)
+        sessions = events.map { |e| e[:session] }
+        expect(sessions).to include("Reverse Grid Race")
+      end
+    end
+
     context "with year detection" do
       let(:html_2026) do
         <<~HTML
