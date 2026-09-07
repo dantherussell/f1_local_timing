@@ -239,12 +239,16 @@ RSpec.describe Event, type: :model do
 
     context 'when event start_datetime is now' do
       it 'returns false' do
-        weekend = build(:weekend)
-        day = build(:day, weekend: weekend, date: Date.current)
-        # Set time slightly in the future to ensure it's not past
-        future_time = (Time.current + 1.hour).strftime('%H:%M')
-        event = build(:event, day: day, start_time: Time.parse(future_time))
-        expect(event.past?).to be false
+        # Freeze time away from midnight so "current time + 1 hour" can never
+        # roll over to the next day and get parsed back as an earlier time today
+        # (this was the cause of intermittent CI failures around 23:00-23:59 UTC).
+        travel_to Time.utc(2024, 1, 1, 12, 0, 0) do
+          weekend = build(:weekend)
+          day = build(:day, weekend: weekend, date: Date.current)
+          future_time = (Time.current + 1.hour).strftime('%H:%M')
+          event = build(:event, day: day, start_time: Time.parse(future_time))
+          expect(event.past?).to be false
+        end
       end
     end
   end
