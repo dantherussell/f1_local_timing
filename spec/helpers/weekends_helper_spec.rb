@@ -83,4 +83,31 @@ RSpec.describe WeekendsHelper, type: :helper do
       end
     end
   end
+
+  describe "#formatted_utc_offset" do
+    it "converts a positive ISO-style offset to UTC+H" do
+      expect(helper.formatted_utc_offset("+02:00")).to eq("UTC+2")
+    end
+
+    it "converts a negative ISO-style offset to UTC-H" do
+      expect(helper.formatted_utc_offset("-04:00")).to eq("UTC-4")
+    end
+
+    it "converts a double-digit hour offset" do
+      expect(helper.formatted_utc_offset("+11:00")).to eq("UTC+11")
+    end
+
+    it "keeps minutes when they are non-zero" do
+      expect(helper.formatted_utc_offset("+05:30")).to eq("UTC+5:30")
+    end
+
+    it "returns an already-normalized offset unchanged" do
+      expect(helper.formatted_utc_offset("UTC+3")).to eq("UTC+3")
+    end
+
+    it "returns blank input unchanged" do
+      expect(helper.formatted_utc_offset(nil)).to be_nil
+      expect(helper.formatted_utc_offset("")).to eq("")
+    end
+  end
 end
