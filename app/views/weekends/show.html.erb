@@ -1,6 +1,6 @@
 <h1><%= @weekend.gp_title %><% if @weekend.sprint? %> <span class="sprint-badge">SPRINT</span><% end %></h1>
-<h2><%= @weekend.location %>, <%= @weekend.timespan %></h2>
-<h2><%= @weekend.local_timezone %> (<%= @weekend.local_time_offset %>)</h2>
+<h2 class="season-heading"><%= @weekend.season.name %></h2>
+<h3><%= @weekend.location %> · <%= @weekend.local_timezone %> (<%= formatted_utc_offset(@weekend.local_time_offset) %>)</h3>
 
 <% if @next_event && @show_countdown %>
   <div class="countdown-container"
