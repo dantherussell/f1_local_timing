@@ -154,7 +154,7 @@ GEM
     jbuilder (2.15.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (3.0.2)
+    json (2.21.2)
     language_server-protocol (3.17.0.6)
     lint_roller (1.1.0)
     local_time (3.0.3)
@@ -408,6 +408,7 @@ DEPENDENCIES
   factory_bot_rails
   importmap-rails
   jbuilder
+  json (< 3)
   local_time
   pg (~> 1.1)
   propshaft
