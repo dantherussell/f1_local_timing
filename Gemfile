@@ -4,7 +4,7 @@ source "https://rubygems.org"
 gem "rails", "~> 8.1.3"
 # Pinned below 3.0: json 3.x breaks session handling (ArgumentError in
 # ActionDispatch::Request::Session) under this Rails/ActiveSupport version.
-gem "json", "< 3"
+gem "json", "< 4"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use postgresql as the database for Active Record
