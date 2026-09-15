@@ -95,6 +95,19 @@ RSpec.describe 'Weekends', type: :request do
       get print_season_weekend_path(season, weekend)
       expect(response.body).not_to include('nav')
     end
+
+    it 'does not include the capture script by default' do
+      get print_season_weekend_path(season, weekend)
+      expect(response.body).not_to include('html2canvas')
+    end
+
+    context 'when capture=1 is requested' do
+      it 'includes a script that captures and posts the page back to its opener' do
+        get print_season_weekend_path(season, weekend), params: { capture: "1" }
+        expect(response.body).to include('html2canvas')
+        expect(response.body).to include('postMessage')
+      end
+    end
   end
 
   describe 'GET /seasons/:season_id/weekends/new' do
@@ -270,6 +283,20 @@ RSpec.describe 'Weekends', type: :request do
         end
       end
 
+      context 'when URL is not a formula1.com URL' do
+        it 'shows an error' do
+          post import_season_weekend_path(season, weekend), params: { url: 'https://example.com/schedule' }, headers: auth_headers
+          expect(response.body).to include('Only formula1.com URLs are supported')
+        end
+      end
+
+      context 'when URL is not a valid URI' do
+        it 'shows an error' do
+          post import_season_weekend_path(season, weekend), params: { url: 'http://exa mple.com' }, headers: auth_headers
+          expect(response.body).to include('Only formula1.com URLs are supported')
+        end
+      end
+
       context 'when fetch fails' do
         before do
           stub_request(:get, f1_url).to_return(status: 404)
@@ -290,6 +317,89 @@ RSpec.describe 'Weekends', type: :request do
         it 'shows the importer error' do
           post import_season_weekend_path(season, weekend), params: { url: f1_url }, headers: auth_headers
           expect(response.body).to include('Database error')
+        end
+      end
+    end
+  end
+
+  describe 'GET /seasons/:season_id/weekends/:id/telegram' do
+    let(:weekend) { create(:weekend, season: season) }
+
+    it 'requires authentication' do
+      get telegram_season_weekend_path(season, weekend)
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'returns a successful response when authenticated' do
+      get telegram_season_weekend_path(season, weekend), headers: auth_headers
+      expect(response).to have_http_status(:success)
+    end
+
+    it 'renders the print view URL for the iframe to capture' do
+      get telegram_season_weekend_path(season, weekend), headers: auth_headers
+      expect(response.body).to include(print_season_weekend_path(season, weekend))
+    end
+  end
+
+  describe 'POST /seasons/:season_id/weekends/:id/telegram' do
+    let(:weekend) { create(:weekend, season: season) }
+    let(:image) { fixture_file_upload('f1_furs_light.png', 'image/png') }
+    let(:preamble) { "They actually got the circuit ready? Neat." }
+
+    it 'requires authentication' do
+      post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    context 'when authenticated' do
+      context 'when Telegram accepts the message' do
+        before do
+          allow_any_instance_of(TelegramNotifier).to receive(:call).and_return(Result.success)
+        end
+
+        it 'sends the composed message and image to TelegramNotifier' do
+          expect(TelegramNotifier).to receive(:new) do |image:, caption:|
+            expect(caption).to include(preamble)
+            expect(caption).to include(season_weekend_url(season, weekend))
+            instance_double(TelegramNotifier, call: Result.success)
+          end
+
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+        end
+
+        it 'redirects to the weekend page on success' do
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+          expect(response).to redirect_to(season_weekend_path(season, weekend))
+        end
+
+        it 'shows a success notice' do
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+          expect(flash[:notice]).to include('Posted to Telegram')
+        end
+      end
+
+      context 'when Telegram rejects the message' do
+        before do
+          allow_any_instance_of(TelegramNotifier).to receive(:call).and_return(Result.failure("Telegram error"))
+        end
+
+        it 'shows the notifier error' do
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+          expect(response.body).to include('Telegram error')
+        end
+      end
+
+      context 'when the composed message exceeds the Telegram caption limit' do
+        let(:preamble) { "a" * 1100 }
+
+        it 'does not call TelegramNotifier' do
+          expect(TelegramNotifier).not_to receive(:new)
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+        end
+
+        it 'shows an error' do
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+          expect(response.body).to include('too long')
         end
       end
     end

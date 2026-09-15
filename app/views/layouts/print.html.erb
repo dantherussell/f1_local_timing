@@ -9,7 +9,7 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
   </head>
 
-  <body class="<%= cookies[:theme] || 'light' %>">
+  <body class="<%= cookies[:theme] || 'light' %> print-page">
     <div class="logo">
       <% if cookies[:theme] == "dark" %>
         <%= image_tag "f1_furs_dark.png", size: '424x56', alt: "" %>
@@ -19,5 +19,28 @@
     </div>
 
     <%= yield %>
+
+    <% if params[:capture] %>
+      <script type="module">
+        import html2canvas from "https://esm.sh/html2canvas@1.4.1"
+
+        window.addEventListener("load", async () => {
+          const raw = await html2canvas(document.body, { windowWidth: document.body.scrollWidth })
+
+          // html2canvas leaves a stray anti-aliasing sliver along the bottom
+          // edge; crop a couple of device pixels off to guarantee it's gone.
+          const trimPx = 2
+          const canvas = document.createElement("canvas")
+          canvas.width = raw.width
+          canvas.height = raw.height - trimPx
+          canvas.getContext("2d").drawImage(raw, 0, 0, raw.width, canvas.height, 0, 0, raw.width, canvas.height)
+
+          window.parent.postMessage(
+            { type: "schedule-capture", dataUrl: canvas.toDataURL("image/png") },
+            window.location.origin
+          )
+        })
+      </script>
+    <% end %>
   </body>
 </html>

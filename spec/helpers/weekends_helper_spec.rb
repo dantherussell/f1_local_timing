@@ -110,4 +110,27 @@ RSpec.describe WeekendsHelper, type: :helper do
       expect(helper.formatted_utc_offset("")).to eq("")
     end
   end
+
+  describe "#telegram_message" do
+    let(:weekend) { build(:weekend, :monaco) }
+    let(:weekend_url) { "https://f1.slashwolf.com/seasons/1/weekends/17" }
+
+    subject(:message) { helper.telegram_message(weekend, "They actually got the circuit ready? Neat.", weekend_url) }
+
+    it "includes the preamble verbatim" do
+      expect(message).to start_with("They actually got the circuit ready? Neat.")
+    end
+
+    it "includes the local timezone and formatted UTC offset" do
+      expect(message).to include("Europe/Monaco (UTC+2)")
+    end
+
+    it "includes the weekend URL" do
+      expect(message).to include(weekend_url)
+    end
+
+    it "separates the preamble from the deterministic footer with a blank line" do
+      expect(message).to include("Neat.\n\nAll times are in")
+    end
+  end
 end

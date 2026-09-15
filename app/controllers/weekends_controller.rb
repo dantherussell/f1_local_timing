@@ -1,7 +1,11 @@
 class WeekendsController < ApplicationController
+  include WeekendsHelper
+
+  TELEGRAM_CAPTION_LIMIT = 1024
+
   before_action :set_season
-  before_action :set_weekend, only: %i[show print edit update destroy import]
-  before_action :authenticate, only: %i[destroy edit new create update import]
+  before_action :set_weekend, only: %i[show print edit update destroy import telegram]
+  before_action :authenticate, only: %i[destroy edit new create update import telegram]
 
   def show
     @days = @weekend.days.includes(:events).order(:date)
@@ -69,6 +73,26 @@ class WeekendsController < ApplicationController
                   notice: "Successfully imported #{importer_result.data[:events_created]} events."
     else
       flash.now[:alert] = importer_result.errors.join(", ")
+    end
+  end
+
+  def telegram
+    return unless request.post?
+
+    caption = telegram_message(@weekend, params[:preamble].to_s, season_weekend_url(@season, @weekend))
+
+    if caption.length > TELEGRAM_CAPTION_LIMIT
+      render plain: "Message is too long for Telegram (#{caption.length}/#{TELEGRAM_CAPTION_LIMIT} characters). Please shorten your preamble.",
+             status: :unprocessable_entity
+      return
+    end
+
+    result = TelegramNotifier.new(image: params[:image], caption: caption).call
+
+    if result.success?
+      redirect_to season_weekend_path(@season, @weekend), notice: "Posted to Telegram."
+    else
+      render plain: result.errors.join(", "), status: :unprocessable_entity
     end
   end
 

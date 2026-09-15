@@ -16,6 +16,8 @@ Rails.application.routes.draw do
         get "print"
         get "import"
         post "import"
+        get "telegram"
+        post "telegram"
       end
       resources :days, only: [ :edit, :update, :destroy ] do
         resources :events, except: [ :index, :show ]
