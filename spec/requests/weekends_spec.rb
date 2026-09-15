@@ -283,6 +283,20 @@ RSpec.describe 'Weekends', type: :request do
         end
       end
 
+      context 'when URL is not a formula1.com URL' do
+        it 'shows an error' do
+          post import_season_weekend_path(season, weekend), params: { url: 'https://example.com/schedule' }, headers: auth_headers
+          expect(response.body).to include('Only formula1.com URLs are supported')
+        end
+      end
+
+      context 'when URL is not a valid URI' do
+        it 'shows an error' do
+          post import_season_weekend_path(season, weekend), params: { url: 'http://exa mple.com' }, headers: auth_headers
+          expect(response.body).to include('Only formula1.com URLs are supported')
+        end
+      end
+
       context 'when fetch fails' do
         before do
           stub_request(:get, f1_url).to_return(status: 404)
