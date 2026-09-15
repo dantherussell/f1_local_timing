@@ -388,6 +388,20 @@ RSpec.describe 'Weekends', type: :request do
           expect(response.body).to include('Telegram error')
         end
       end
+
+      context 'when the composed message exceeds the Telegram caption limit' do
+        let(:preamble) { "a" * 1100 }
+
+        it 'does not call TelegramNotifier' do
+          expect(TelegramNotifier).not_to receive(:new)
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+        end
+
+        it 'shows an error' do
+          post telegram_season_weekend_path(season, weekend), params: { preamble: preamble, image: image }, headers: auth_headers
+          expect(response.body).to include('too long')
+        end
+      end
     end
   end
 end

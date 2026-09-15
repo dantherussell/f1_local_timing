@@ -14,7 +14,8 @@ class TelegramNotifier
     post_photo
     Result.success
   rescue StandardError => e
-    Result.failure("Error sending Telegram message: #{e.message}")
+    Rails.logger.error("Telegram request failed (#{e.class})")
+    Result.failure("Error sending Telegram message.")
   end
 
   private

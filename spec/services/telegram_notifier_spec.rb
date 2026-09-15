@@ -55,8 +55,14 @@ RSpec.describe TelegramNotifier do
         expect(result).to be_failure
       end
 
-      it "includes an error message" do
-        expect(result.errors.join).to include("Bad Request")
+      it "returns a generic error message, not the raw response body" do
+        expect(result.errors.join).not_to include("Bad Request")
+        expect(result.errors.join).to include("Error sending Telegram message")
+      end
+
+      it "logs the failure server-side for debugging" do
+        expect(Rails.logger).to receive(:error).with(a_string_including("Telegram"))
+        result
       end
     end
 
@@ -67,6 +73,18 @@ RSpec.describe TelegramNotifier do
 
       it "returns a failure result" do
         expect(result).to be_failure
+      end
+    end
+
+    context "when the bot token is malformed and breaks URI parsing" do
+      let(:token) { "bad token with spaces" }
+
+      it "returns a failure result" do
+        expect(result).to be_failure
+      end
+
+      it "does not leak the token in the error message" do
+        expect(result.errors.join).not_to include(token)
       end
     end
   end

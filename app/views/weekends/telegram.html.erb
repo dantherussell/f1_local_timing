@@ -1,17 +1,13 @@
 <h1>Post to Telegram</h1>
 <h2><%= @weekend.gp_title %></h2>
 
-<% if flash.now[:alert] %>
-  <div class="alert alert-danger">
-    <%= flash.now[:alert] %>
-  </div>
-<% end %>
-
 <div data-controller="telegram-share"
      data-telegram-share-print-url-value="<%= print_season_weekend_path(@season, @weekend) %>">
   <iframe data-telegram-share-target="frame" style="width: 480px; height: 1px; border: 0;"></iframe>
 
   <p><img data-telegram-share-target="preview" alt="Schedule preview" style="max-width: 100%;"></p>
+
+  <div class="alert alert-danger" data-telegram-share-target="error" hidden></div>
 
   <%= form_with url: telegram_season_weekend_path(@season, @weekend), method: :post, local: true,
                 data: { telegram_share_target: "form", action: "submit->telegram-share#submit" } do |f| %>

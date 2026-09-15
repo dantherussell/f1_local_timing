@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["frame", "preview", "form", "submitButton"]
+  static targets = ["frame", "preview", "form", "submitButton", "error"]
   static values = { printUrl: String }
 
   connect() {
@@ -27,7 +27,10 @@ export default class extends Controller {
 
   submit(event) {
     event.preventDefault()
-    if (!this.blob) return
+    if (!this.blob || this.submitButtonTarget.disabled) return
+
+    this.hideError()
+    this.submitButtonTarget.disabled = true
 
     const formData = new FormData(this.formTarget)
     formData.set("image", this.blob, "schedule.png")
@@ -36,10 +39,26 @@ export default class extends Controller {
       method: "POST",
       body: formData,
       headers: { "Accept": "text/vnd.turbo-stream.html, text/html" }
-    }).then((response) => {
+    }).then(async (response) => {
       if (response.redirected) {
         window.location = response.url
+        return
       }
+
+      this.showError(await response.text())
+      this.submitButtonTarget.disabled = false
+    }).catch((error) => {
+      this.showError(error.message)
+      this.submitButtonTarget.disabled = false
     })
+  }
+
+  showError(message) {
+    this.errorTarget.textContent = message
+    this.errorTarget.hidden = false
+  }
+
+  hideError() {
+    this.errorTarget.hidden = true
   }
 }
