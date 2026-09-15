@@ -16,4 +16,12 @@ module WeekendsHelper
     formatted += ":#{minutes}" unless minutes == "00"
     formatted
   end
+
+  def telegram_message(weekend, preamble, weekend_url)
+    <<~MESSAGE.strip
+      #{preamble}
+
+      All times are in #{weekend.local_timezone} (#{formatted_utc_offset(weekend.local_time_offset)}). For start times in your local time zone, visit #{weekend_url}
+    MESSAGE
+  end
 end

@@ -1,4 +1,10 @@
 body {
+  margin: 0;
+  // Prevents the first/last child's margin from collapsing into body's own
+  // margin, which html2canvas renders as a stray solid-color block (it
+  // doesn't paint body's background into the collapsed-margin region).
+  padding-top: 1px;
+  padding-bottom: 1px;
   font-family: 'f1-regular', sans-serif;
   text-align: center;
 }
@@ -37,6 +43,12 @@ h4 {
 .logo {
   margin-bottom: 2em;
   margin-top: 2em;
+}
+
+// The print view is screenshotted as-is (Telegram share feature), so it
+// should start right at the logo with no leading gap.
+.print-page .logo {
+  margin-top: 0;
 }
 
 input, select {
