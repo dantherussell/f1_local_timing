@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.1.3"
+gem "rails", "~> 8.1.4"
 # Pinned below 3.0: json 3.x breaks session handling (ArgumentError in
 # ActionDispatch::Request::Session) under this Rails/ActiveSupport version.
 gem "json", "< 3"
